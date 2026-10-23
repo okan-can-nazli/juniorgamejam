@@ -1,0 +1,195 @@
+{
+    "levels": {
+        "maxLevel": 5,
+        "damage": [10, 13, 16, 19, 22],
+        "speedPx": [220, 238, 255, 273, 290],
+        "maxHp": [100, 115, 130, 145, 160]
+    },
+    "regen": {
+        "delayAfterDamageSec": 5,
+        "secondsPerHp": [10, 9, 8, 7, 6]
+    },
+    "inventory": {
+        "capRed": 40,
+        "capYellow": 40,
+        "capGreen": 40,
+        "capOrange": 5,
+        "pickupRadiusPx": 32
+    },
+    "recipes": {
+        "power": [
+            { "red": 3, "yellow": 1, "green": 1, "orange": 0 },
+            { "red": 8, "yellow": 4, "green": 4, "orange": 0 },
+            { "red": 15, "yellow": 8, "green": 8, "orange": 0 },
+            { "red": 25, "yellow": 15, "green": 15, "orange": 0 }
+        ],
+        "speed": [
+            { "red": 1, "yellow": 3, "green": 1, "orange": 0 },
+            { "red": 4, "yellow": 8, "green": 4, "orange": 0 },
+            { "red": 8, "yellow": 15, "green": 8, "orange": 0 },
+            { "red": 15, "yellow": 25, "green": 15, "orange": 0 }
+        ],
+        "health": [
+            { "red": 1, "yellow": 1, "green": 3, "orange": 0 },
+            { "red": 4, "yellow": 4, "green": 8, "orange": 0 },
+            { "red": 8, "yellow": 8, "green": 15, "orange": 0 },
+            { "red": 15, "yellow": 15, "green": 25, "orange": 0 }
+        ],
+        "potion": { "red": 0, "yellow": 0, "green": 2, "orange": 1 },
+        "potionHeal": 40
+    },
+    "crafting": {
+        "durationSec": 1.5,
+        "safeNoDamageSec": 3,
+        "safeNoSwingSec": 3,
+        "notifySec": 3
+    },
+    "threat": {
+        "smallMinScore": 2,
+        "mediumMinScore": 4,
+        "largeMinScore": 7,
+        "pileLeafCount": [0, 6, 12, 18],
+        "pileRadiusScale": [1.0, 1.2, 1.4, 1.6],
+        "pileGrowSec": 0.3
+    },
+    "character": {
+        "radiusPx": 20,
+        "hitFlashSec": 0.1,
+        "deathEffectSec": 1
+    },
+    "camera": {
+        "referenceWidth": 640,
+        "referenceHeight": 360,
+        "assetsPixelsPerUnit": 16
+    },
+    "match": {
+        "countdownSec": 3,
+        "botScarves": ["Purple", "White", "Black"],
+        "botProfiles": ["Aggressive", "Agile", "Tough"]
+    },
+    "axe": {
+        "rangePx": 60,
+        "arcDeg": 100,
+        "cooldownSec": 0.5,
+        "hitDelaySec": 0.12,
+        "swingSpeedMultiplier": 0.5,
+        "maxTreesPerSwing": 1
+    },
+    "abilities": {
+        "unlockLevel": 5,
+        "dashDistancePx": 160,
+        "dashDurationSec": 0.15,
+        "dashCooldownSec": 3,
+        "shieldDurationSec": 6,
+        "ultiWindupSec": 0.4,
+        "ultiRadiusPx": 120
+    },
+    "bots": {
+        "perceptionRadiusPx": 650,
+        "decisionIntervalSec": 0.2,
+        "enemyNearPx": 500,
+        "zoneLookaheadSec": 10,
+        "fleeHpRatio": 0.35,
+        "fleeExitHpRatio": 0.5,
+        "fleeDashEnemyPx": 200,
+        "attackDashMinPx": 160,
+        "attackDashMaxPx": 300,
+        "targetTierWeight": 200,
+        "firstSwingDelaySec": 0.25,
+        "potionHpRatio": 0.5,
+        "stuckCheckSec": 2,
+        "stuckMinMovePx": 20,
+        "unstuckRadiusPx": 200,
+        "shieldHpRatio": 0.5,
+        "shieldEnemyPx": 100,
+        "ultiEnemyPx": 120,
+        "navCellPx": 20,
+        "priorityAggressive": ["Power", "Health", "Speed"],
+        "priorityAgile": ["Speed", "Power", "Health"],
+        "priorityTough": ["Health", "Power", "Speed"]
+    },
+    "trees": {
+        "greatSpawnIntervalSec": 5,
+        "greatOrangeChance": 0.25,
+        "clusterSpawnIntervalSec": 45,
+        "clusterOrangeChance": 0.05,
+        "groveSpawnIntervalSec": 60,
+        "groveOrangeChance": 0.02,
+        "choppableHp": 400,
+        "felledLeavesMin": 6,
+        "felledLeavesMax": 10,
+        "felledOrangeChance": 0.1,
+        "dropRadiusPx": 120,
+        "hpBarSec": 2
+    },
+    "leaves": {
+        "lifetimeSec": 45,
+        "blinkBeforeSec": 5,
+        "maxOnMap": 80,
+        "fallMaxSec": 0.6,
+        "startPerCluster": 3,
+        "startAtGreatTree": 2,
+        "startAtGreatTreeOrange": 1,
+        "maxDropTries": 20
+    },
+    "zone": {
+        "tickSec": 0.5,
+        "warningSec": 10,
+        "phases": [
+            { "startSec": 0, "endSec": 90, "startRadiusPx": 1700, "endRadiusPx": 1700, "damagePerSec": 0 },
+            { "startSec": 90, "endSec": 135, "startRadiusPx": 1700, "endRadiusPx": 1000, "damagePerSec": 4 },
+            { "startSec": 135, "endSec": 180, "startRadiusPx": 1000, "endRadiusPx": 1000, "damagePerSec": 4 },
+            { "startSec": 180, "endSec": 225, "startRadiusPx": 1000, "endRadiusPx": 500, "damagePerSec": 7 },
+            { "startSec": 225, "endSec": 270, "startRadiusPx": 500, "endRadiusPx": 150, "damagePerSec": 10 },
+            { "startSec": 270, "endSec": 300, "startRadiusPx": 150, "endRadiusPx": 0, "damagePerSec": 15 }
+        ],
+        "suddenDeathStartSec": 300,
+        "suddenDeathDamagePerSec": 50
+    },
+    "loot": {
+        "rygRatio": 0.35,
+        "orangeRatio": 0.6,
+        "lifetimeSec": 45,
+        "oneLeafMaxTotal": 10,
+        "twoLeavesMaxTotal": 20
+    },
+    "bushes": {
+        "revealSec": 1,
+        "playerInBushAlpha": 0.5
+    },
+    "map": {
+        "sizePx": 2400,
+        "clearingRadiusPx": 350,
+        "greatTreeTrunkRadiusPx": 40,
+        "greatTreeCanopyRadiusPx": 160,
+        "rockRingPx": 280,
+        "rockAnglesDeg": [45, 135, 225, 315],
+        "rockSizePx": 60,
+        "clusterCount": 8,
+        "clusterRingPx": 600,
+        "clusterStartDeg": 0,
+        "clusterStepDeg": 45,
+        "clusterRadiusPx": 150,
+        "clusterTreeCount": 3,
+        "clusterTreeOffsetPx": 65,
+        "clusterTreeStepDeg": 120,
+        "groveRingPx": 1270,
+        "groveAnglesDeg": [45, 135, 225, 315],
+        "groveRadiusPx": 220,
+        "groveCenterTrees": 1,
+        "groveRingTrees": 4,
+        "groveRingOffsetPx": 110,
+        "groveRingStepDeg": 90,
+        "treeTrunkRadiusPx": 18,
+        "outerBushCount": 8,
+        "outerBushRingPx": 850,
+        "outerBushStartDeg": 22.5,
+        "outerBushStepDeg": 45,
+        "outerBushRadiusPx": 60,
+        "innerBushRingPx": 450,
+        "innerBushAnglesDeg": [22.5, 112.5, 202.5, 292.5],
+        "innerBushRadiusPx": 40,
+        "spawnRingPx": 1000,
+        "spawnAnglesDeg": [0, 90, 180, 270]
+    }
+}

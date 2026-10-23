@@ -1,0 +1,27 @@
+# Unity YAML: metin olarak sakla, UnityYAMLMerge ile birleştir
+*.unity       text eol=lf merge=unityyamlmerge
+*.prefab      text eol=lf merge=unityyamlmerge
+*.asset       text eol=lf merge=unityyamlmerge
+*.anim        text eol=lf merge=unityyamlmerge
+*.controller  text eol=lf merge=unityyamlmerge
+*.mat         text eol=lf merge=unityyamlmerge
+*.meta        text eol=lf
+*.cs          text eol=lf diff=csharp
+*.json        text eol=lf
+*.inputactions text eol=lf
+*.md          text eol=lf
+
+# Görsel ve ses: ikili (LFS kullanılmıyor; ses dosyaları 1 MB'tan küçük)
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.psd      binary
+*.aseprite binary
+*.ase      binary
+*.gif      binary
+*.wav      binary
+*.ogg      binary
+*.mp3      binary
+*.ttf      binary
+*.otf      binary
+*.pdf      binary

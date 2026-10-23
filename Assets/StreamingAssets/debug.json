@@ -1,0 +1,8 @@
+{
+    "seed": 0,
+    "botCount": 3,
+    "startInventory": { "red": 0, "yellow": 0, "green": 0, "orange": 0 },
+    "startLevels": { "power": 1, "speed": 1, "health": 1 },
+    "timeScale": 1,
+    "showOverlay": false
+}
