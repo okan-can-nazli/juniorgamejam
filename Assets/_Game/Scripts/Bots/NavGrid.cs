@@ -68,6 +68,7 @@ namespace LeafBrawl.Bots
             _open = new MinHeap(count);
 
             var world = Services.World;
+            Physics2D.SyncTransforms();   // harita aynı karede kurulduysa collider'lar sorguya girsin
             for (int y = 0; y < _size; y++)
                 for (int x = 0; x < _size; x++)
                     _blocked[y * _size + x] = world.IsBlocked(Center(x, y), _radiusPx);

@@ -41,6 +41,9 @@ namespace LeafBrawl.Bots
 
         void Awake() => _self = GetComponent<Character>();
 
+        // Yol ızgarası harita kurulduktan sonra, geri sayımda hazırlansın; maç içinde ilk yol isteğinde takılma olmasın.
+        void Start() => NavGrid.Get();
+
         public CharacterIntent ReadIntent(Character self)
         {
             if (Time.time >= _nextDecisionTime)
@@ -202,6 +205,7 @@ namespace LeafBrawl.Bots
             away = distance > 0.0001f ? away / distance : -_self.Facing;
 
             Vector2 goal = Services.Visibility.NearestBush(pos) ?? (_target.Position + away * Units.ToUnits(bots.enemyNearPx));
+            if (!SafeToGo(goal)) goal = SafeFleePoint(away);
             intent.Move = _navigator.Steer(pos, goal);
             intent.Aim = intent.Move.sqrMagnitude > 0f ? intent.Move : away;
 
@@ -317,6 +321,16 @@ namespace LeafBrawl.Bots
             var map = Services.Config.map;
             float trunkPx = ReferenceEquals(tree, Services.World.GreatTree) ? map.greatTreeTrunkRadiusPx : map.treeTrunkRadiusPx;
             return centerDistance <= Units.ToUnits(Services.Config.axe.rangePx + trunkPx);
+        }
+
+        // Kaçış noktası alan dışına (veya harita dışına) düşüyorsa: alanın içinde, rakibin ters yönündeki en uzak nokta.
+        // Yoksa bot Kaç ile Alana dön arasında gidip gelir.
+        Vector2 SafeFleePoint(Vector2 away)
+        {
+            var zone = Services.Zone;
+            float radiusPx = Mathf.Min(zone.RadiusPx, zone.NextRadiusPx) - Services.Config.character.radiusPx;
+            Vector2 point = zone.Center + away * Units.ToUnits(Mathf.Max(0f, radiusPx));
+            return NavGrid.Get().NearestOpen(point);
         }
 
         // Topla hedefi alan içinde ve zoneLookaheadSec boyunca içeride kalacak olmalı; yoksa bot Alana dön ile
