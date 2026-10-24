@@ -122,4 +122,5 @@ graphify-out/
 *.csproj
 Assets/StreamingAssets/debug.local.json
 Assets/StreamingAssets/debug.local.json.meta
+MapPreview/
 .idea/

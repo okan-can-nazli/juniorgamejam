@@ -275,8 +275,9 @@ Bir iş, aşağıdakilerin hepsi doğruysa bitmiştir:
 
 | Görev | SRS |
 | --- | --- |
-| [ ] **Harita üretici** (`World/Editor/MapBuilder.cs`): Unity menüsüne "Leaf Brawl → Haritayı Kur" komutu ekle. Komut `Map.prefab`'ın içini `balance.json`'daki `map` bölümünden **otomatik** kursun: ulu ağaç, 4 kaya, 8 küme × 3 ağaç, 4 koru × 5 ağaç, 4 doğma noktası, harita sınırı. Elle yerleştirme yapma; böylece bir ölçü değişince komutu yeniden çalıştırmak yeter | 3.12 |
-| [ ] Koordinatlar: merkez (0,0) kabul edilir. Halkadaki bir öğenin konumu `(r·cos a, r·sin a)` ile hesaplanır. Kümeler 600 px halkada, 0°'den başlayarak 45° aralıkla. Korular 1270 px'te, 45°, 135°, 225° ve 315°'de. Kayalar 280 px'te, aynı çaprazlarda. Doğma noktaları 1000 px'te, 0°, 90°, 180° ve 270°'de. Küme içi ve koru içi dizilim `map` bölümünde yazar | 3.12 |
+| [ ] **Harita üretici** (`World/Editor/MapBuilder.cs`): Unity menüsüne "Leaf Brawl → Haritayı Kur" komutu ekle. Komut `Map.prefab`'ın içini `balance.json`'daki `map` bölümünden **otomatik** kursun; yerleşimi `MapLayoutGenerator` hesaplar (yazıldı, `okan/harita-uretici`), builder yalnızca öğeleri yerleştirir: ulu ağaç, 4 kaya, 8 küme × 3 ağaç, 4 koru × 5 ağaç, 4 doğma noktası, harita sınırı. Elle yerleştirme yapma; böylece bir ölçü değişince komutu yeniden çalıştırmak yeter | 3.12 |
+| [ ] Koordinatlar: merkez (0,0) kabul edilir. Halkadaki bir öğenin konumu `(r·cos a, r·sin a)` ile hesaplanır. Kümeler 600 px halkada, 0°'den başlayarak 45° aralıkla. Korular 1270 px'te, 45°, 135°, 225° ve 315°'de. Kayalar 280 px'te, aynı çaprazlarda. Doğma noktaları 1000 px'te, 0°, 90°, 180° ve 270°'de. Küme içi ve koru içi dizilim `map` bölümünde yazar. **Her maçta küçük sapma:** bu konumlar merkez değerlerdir; `MapLayoutGenerator` maç başında `Services.Rng` ile sapma ekler ve doğrular (SRS 3.12). Sapma değerleri sözleşme PR'ı gelene kadar `MapGenSettings.cs`'te durur | 3.12 |
+| [ ] `MapGenerator` (MonoBehaviour, `Map.prefab` üzerinde): maç başında `MapGenSettings.FromConfig(Services.Config)` ve `Services.Rng` ile `MapLayoutGenerator.Generate` çağırıp haritayı kurar; `MapBuilder` aynı sınıfı editörde önizleme için kullanır. Harita `WorldService` ve `LeafSpawner`'dan önce hazır olmalı | 3.12, NFR-07 |
 | [ ] Zemin: 2400×2400 px = 60×60 birim. Tilemap ile çim; merkezde 350 px yarıçaplı açıklık farklı zeminle. Harita sınırı `Obstacle` katmanında 4 kutu collider | 3.12 |
 | [ ] Engeller: ağaç gövdeleri `CircleCollider2D` (küme ve koru 18 px, ulu ağaç 40 px) ve `Obstacle` katmanında. Hasar alabilmesi için gövdede ayrıca `Tree` katmanında bir collider bulunsun. Kayalar 60×60 px `BoxCollider2D`, `Obstacle` katmanında | FR-12 |
 | [ ] `WorldService : IWorld`: `Awake`'te `Services.World = this`. `PickupsNear`, `TreesNear` (yalnızca kesilmemiş ağaçlar), `GreatTree`, `SpawnPoints`, `IsBlocked` (`Physics2D.OverlapCircle` + harita sınırı) | — |
@@ -311,7 +312,7 @@ Bir iş, aşağıdakilerin hepsi doğruysa bitmiştir:
 | --- | --- |
 | [ ] Kabul testlerini yürüt: `asama-2` etiketinden sonra ve teslimden önce olmak üzere iki tam tur. KT-01–KT-18'in hepsini dene, `docs/kabul_testleri.md`'yi güncelle, kalan her test için **testin sahibine** issue aç | Bölüm 9 |
 | [ ] Ekonomi dengesi: 5 maç oyna. Maç sonunda oyuncu ve botların ulaştığı seviyeleri ve kesilen ağaç sayısını not et. Gerekirse kendi bölümündeki değerleri değiştir (yaprak üretim aralıkları, ağaç canı, ganimet oranları). Tarif maliyeti Yiğit'in bölümünde olduğu için ona öneriyi issue olarak aç | 2.5, 9.2 |
-| [ ] Sabit tohumla iki maçta yaprak üretiminin aynı olduğunu Yiğit'le doğrula | NFR-07 |
+| [ ] Sabit tohumla iki maçta harita yerleşiminin ve yaprak üretiminin aynı olduğunu Yiğit'le doğrula | NFR-07 |
 | [ ] Demo değerlendirmesi: en az 5 kişi × 3 maç. Her maçtan sonra SRS 9.2'deki 5 soru (1–5 puan) sorulur. Sonuçlar ve ortalama `docs/demo_degerlendirme.md` dosyasına yazılır | 9.2 |
 
 ### Kabul testlerinde senin payın

@@ -247,5 +247,14 @@ namespace LeafBrawl.Shared
         public float innerBushRadiusPx;
         public float spawnRingPx;
         public float[] spawnAnglesDeg;
+
+        // Her maç tohumdan sapma ve doğrulama (SRS 3.12)
+        public float angleJitterDeg, radiusJitterPx;          // küme ve koru merkezi
+        public float rockAngleJitterDeg, rockRadiusJitterPx;  // kayalar (0 = sabit)
+        public float bushAngleJitterDeg, bushRadiusJitterPx;
+        public float treeJitterPx;                            // küme/koru içindeki her ağaç (x ve y ayrı)
+        public int placeTries;                                // tek bir küme/koru/çalılığın yerleşme denemesi
+        public int maxRetries;                                // bütün haritanın yeniden üretim sınırı
+        public float boundsMarginPx, minGapPx, minPassagePx, spawnClearPx;
     }
 }

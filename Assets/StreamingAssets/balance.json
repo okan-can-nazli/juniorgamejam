@@ -190,6 +190,19 @@
         "innerBushAnglesDeg": [22.5, 112.5, 202.5, 292.5],
         "innerBushRadiusPx": 40,
         "spawnRingPx": 1000,
-        "spawnAnglesDeg": [0, 90, 180, 270]
+        "spawnAnglesDeg": [0, 90, 180, 270],
+        "angleJitterDeg": 20,
+        "radiusJitterPx": 150,
+        "rockAngleJitterDeg": 0,
+        "rockRadiusJitterPx": 0,
+        "bushAngleJitterDeg": 18,
+        "bushRadiusJitterPx": 120,
+        "treeJitterPx": 15,
+        "placeTries": 30,
+        "maxRetries": 50,
+        "boundsMarginPx": 40,
+        "minGapPx": 20,
+        "minPassagePx": 80,
+        "spawnClearPx": 150
     }
 }

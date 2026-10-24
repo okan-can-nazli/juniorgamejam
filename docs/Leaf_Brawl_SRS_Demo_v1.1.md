@@ -1,6 +1,6 @@
 # Leaf Brawl – Yazılım Gereksinimleri Spesifikasyonu (Demo v1.1)
 
-23 Ekim 2026 · Yiğit Ahmet Hosta · v1.0'a gelen ekip geri bildirimleriyle güncellendi (değişiklikler Bölüm 11'de)
+23 Ekim 2026 · Yiğit Ahmet Hosta · v1.0'a gelen ekip geri bildirimleriyle güncellendi (değişiklikler Bölüm 11'de; 24 Ekim: harita çeşitliliği eklendi)
 
 ## 1. Giriş
 
@@ -13,7 +13,7 @@ Demonun tek amacı şu soruyu yanıtlamaktır: Oyuncu birkaç dakika içinde yap
 ### 1.2 Kapsam
 
 - Tek insan oyuncu, 3 bilgisayar kontrollü rakip (bot), toplam 4 karakter.
-- Tek, elle tasarlanmış sonbahar haritası; pixel art görseller.
+- Tek sonbahar haritası düzeni; her maçta tohumdan küçük ve sınırlı sapmalarla üretilir (3.12). Pixel art görseller.
 - Yeniden doğma yok; ölen karakter elenir.
 - Yakın dövüş silahı olarak balta; mermi ve menzilli saldırı yok.
 - 4 yaprak türü, 3 geliştirme (en fazla 5. seviye) ve can iksiri, 5. seviyede açılan 3 yetenek, çalılıklar, kesilebilir ağaçlar, daralan güvenli alan.
@@ -236,7 +236,7 @@ Karakter yığına 32 px yaklaştığında yığındaki **gerçek adetler** enva
 
 ![Harita düzeni · 2400×2400 px, ulu ağaç, 8 ağaç kümesi, 4 köşe korusu, 12 çalılık](img/harita_duzeni_v1.1.png)
 
-Harita sabittir ve elle tasarlanır. Bütün ölçüler merkeze göredir.
+Harita düzeni elle tasarlanmıştır, ama konumlar **merkez değerlerdir**: maç başında harita, maçın tohumundan (NFR-07) bu değerlerin çevresinde küçük ve sınırlı sapmalarla yeniden üretilir. Böylece her maç biraz farklı bir harita sunar, adalet bozulmaz. Görsel merkez düzeni gösterir. Bütün ölçüler merkeze göredir.
 
 | Öğe | Adet | Konum | Boyut |
 | --- | --- | --- | --- |
@@ -250,6 +250,16 @@ Harita sabittir ve elle tasarlanır. Bütün ölçüler merkeze göredir.
 | Doğma noktası | 4 | Merkeze 1000 px, eksenlerde (0°, 90°, 180°, 270°) | — |
 
 Köşe koruları ilk daralma bitince (1270 − 220 = 1050 > 1000) tamamen alan dışında kalır. Dış çalılıklar 2. daralmanın ilk saniyelerinde, iç çalılıklar 3. daralmanın başında alan dışına düşer.
+
+**Her maçta üretim (sapma ve doğrulama):**
+
+| Sabit kalanlar | Sapan öğeler |
+| --- | --- |
+| Ulu ağaç, merkez açıklığı, 4 kaya, 4 doğma noktası; bütün öğe sayıları | Küme ve koru merkezleri, çalılıklar, küme ve koru içindeki her ağaç; kümelerin ve korunun iç dizilimi rastgele döndürülür |
+
+- Sapma payları: küme ve koru merkezi ±20° ve ±150 px (kümeler kendi 45°'lik diliminde kalır); çalılık ±18° ve ±120 px; küme ve koru içindeki ağaçlar her eksende ±15 px. Kayalar merkez açıklığın parçasıdır ve sabit kalır. Değerler `balance.json` `map` bölümünde tutulur (NFR-05).
+- Üretimden sonra şu kurallar doğrulanır: (1) hiçbir öğe harita kenarından 40 px'ten fazla taşmaz; (2) gövde ve kayalar arasında en az 20 px boşluk kalır; (3) çalılık merkezi bir gövdeye 20 px'ten yakın olmaz ve çalılıklar üst üste binmez; (4) doğma noktalarının 150 px çevresi boştur; (5) küme ve koru ağaçları ile çalılıklar merkez açıklığa girmez; (6) koru ağaçları ilk daralma bitince tamamen alan dışında kalır; (7) küme ve koru daireleri arasında en az 80 px geçit kalır (tablodaki ≈160 px merkez değerdir). Öğeler sırayla yerleştirilir; kuralı bozan öğe yalnızca kendisi yeniden denenir (en fazla 30 deneme). Bir öğe yerleşemezse bütün harita yeniden üretilir (en fazla 50 deneme); hiçbiri tutmazsa tablodaki merkez düzen kullanılır.
+- Aynı tohum aynı haritayı verir. Botlar, yaprak üretimi ve görseller konumları sabit varsaymaz; ağaç, çalılık ve doğma noktalarını `Services.World` ve `Services.Visibility` üzerinden okur.
 
 ### 3.13 Ölçek ve pixel art
 
@@ -332,7 +342,7 @@ Demoda 6 ekran vardır; ana menüdeki "Çıkış" uygulamayı kapatır. Duraklat
 
 | No | Gereksinim |
 | --- | --- |
-| FR-50 | Haritada 3.12'deki konumlarda 12 çalılık bulunur. |
+| FR-50 | Haritada 3.12'deki düzene göre (sapma payıyla) 12 çalılık bulunur. |
 | FR-51 | Çalılıktaki karakter ve yaprak yığını, aynı çalılıkta olmayan karakterlere görünmez. Bu kural botlar için de geçerlidir. |
 | FR-52 | Çalılıktaki karakter balta savurduğunda veya hasar aldığında 1 sn boyunca herkese görünür olur. |
 | FR-53 | Oyuncu çalılıktayken kendi karakteri yarı saydam çizilir. |
@@ -459,7 +469,7 @@ Yapraklar renk körlüğüne karşı renkle birlikte şekille de ayırt edilir. 
 | NFR-04 | Çevrimdışı çalışma | Uygulama hiçbir ağ isteği yapmaz; internet kapalıyken tüm işlevler çalışır. Hesap, telemetri, reklam, analiz ve kayıt dosyası yoktur. |
 | NFR-05 | Ayarlanabilirlik | Bölüm 3'teki tüm sayısal değerler `Assets/StreamingAssets/balance.json` dosyasında tutulur; böylece derlenmiş yapıda da kod değişmeden düzenlenebilir. Ayrı bir `debug.json` dosyasında test için tohum, bot sayısı (0–3) ve oyuncunun başlangıç envanteri ile seviyeleri ayarlanabilir; test başlangıç envanteri envanter sınırlarını aşabilir. Demo yapısında bu ayarlar varsayılan değerlerdedir. |
 | NFR-06 | Kararlılık | 10 ardışık maçta çökme, donma veya botun 2 sn'den uzun takılı kalması olmaz. |
-| NFR-07 | Tekrarlanabilirlik | Rastgelelik tek bir tohum (seed) değerinden üretilir; ayar dosyasında sabit tohum verildiğinde aynı maç başlangıcı ve yaprak üretimi tekrarlanır (hata ayıklama için). |
+| NFR-07 | Tekrarlanabilirlik | Rastgelelik tek bir tohum (seed) değerinden üretilir; ayar dosyasında sabit tohum verildiğinde aynı maç başlangıcı, harita yerleşimi ve yaprak üretimi tekrarlanır (hata ayıklama için). |
 | NFR-08 | Erişilebilirlik | Yapraklar şekille ayrılır (6.3). HUD yazıları 1080p'de en az 18 px; metin ile arka plan kontrastı en az 4.5:1. |
 | NFR-09 | Özgünlük | Tüm karakter, yaprak, harita, arayüz, ses ve kod ekibe aittir veya açık lisanslıdır; lisanslar bir `CREDITS` dosyasında listelenir. Referans oyunlardan hiçbir varlık veya isim kullanılmaz. |
 | NFR-10 | Ses | Balta savurma, isabet, ağaca vurma, ağaç devrilmesi, yaprak toplama, tarif üretimi, yetenek kullanımı, ölüm ve alan uyarısı için birer kısa ses efekti; müzik zorunlu değildir. Duraklatma menüsünde ses açma/kapama düğmesi bulunur. |
@@ -482,7 +492,7 @@ Aşağıdakiler demoda yoktur ve demo için tasarım, kod veya altyapı hazırl�
 | Aynı alanda uzun kalınca yaprak üretiminin azalması | Yok; pasif oyunu alan daralması çözer |
 | Zamanlı etkinlikler, özel ağaç türleri | Yok |
 | Mini harita, ekran dışı yığın göstergesi | Yok |
-| Birden çok karakter modeli veya harita | Yok; tek karakter modeli (atkı rengiyle ayrılır), tek harita |
+| Birden çok karakter modeli veya harita | Yok; tek karakter modeli (atkı rengiyle ayrılır), tek harita düzeni (her maç küçük sapmayla) |
 | Seviyeyle değişen balta görseli | Yok; tek balta görseli |
 | Hesap, ilerleme kaydı, skor tablosu, kozmetik, mağaza | Yok |
 | Gamepad, dokunmatik, mobil | Yok |
@@ -567,6 +577,7 @@ Kaynaklar: **O** = Okan'ın notları, **H** = Hamza'nın geri bildirim belgesi, 
 | Bot kaçışı | Kaç durumundaki bot dibindeki rakibe vurur; %50 canda Kaç'tan çıkar | H | BOT-05 |
 | Karakter tanıma | Rakip can çubuğu ve atkı rengi eklendi | H | FR-63, FR-64 |
 | Harita ölçüleri | Küme, koru, kaya, açıklık, çalılık ölçüleri tablolandı | H | 3.12 |
+| Harita çeşitliliği | Harita artık sabit değil: 3.12'deki konumlar merkez değer; her maç tohumdan küçük, sınırlı sapmayla üretilir ve doğrulanır | O | 1.2, 3.12, FR-50, NFR-07, 8 |
 | Küçük eksikler | Geçersiz düşme noktası, geri sayım/maç saati, Esc davranışları, KT-08 ve KT-10 düzeltildi | H | FR-05, FR-06, FR-08, FR-34, 9 |
 | Kılavuz | Ana menüye oynanış kılavuzu eklendi | Y | FR-01, FR-03, 2.3, 8 |
 | Geliştirme sırası | 3 aşamalı geliştirme planı eklendi | H | 10 |
@@ -582,3 +593,4 @@ Geri bildirimlerde açık bırakılan bazı noktalar şu şekilde karara bağlan
 5. **Turuncu yaprağın rolü:** T yalnızca can iksirinde kullanılır. Bu, v1.0'daki turuncu yaprak darboğazını da ortadan kaldırır.
 6. **Ulti:** 120 px içindeki bütün rakipleri canına bakmadan öldürür ve ağaçları keser; kalkan ultiyi bir kez durdurur.
 7. **Ara maliyetler:** Tarif tablolarındaki 2 → 3 ve 3 → 4 maliyetleri ile Hız/Sağlık tabloları, Yiğit'in 1 → 2 ve 4 → 5 örneklerine göre dolduruldu.
+8. **Rastgele harita:** Okan'ın önerisi (her maç küçük sapmalı harita) Yiğit tarafından sözlü onaylandı. Hamza ve Furkan'ın itirazı yoksa geçerlidir; bot ve görsel kodu konumları sabit varsaymamalı, `Services.World` üzerinden okumalıdır.
