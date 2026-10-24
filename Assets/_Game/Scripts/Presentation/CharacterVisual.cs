@@ -1,357 +1,386 @@
-using System;
-using System.Reflection;
-using UnityEngine;
-using LeafBrawl.Shared;
 using LeafBrawl.Characters;
+using LeafBrawl.Shared;
+using UnityEngine;
 
 namespace LeafBrawl.Presentation
 {
     /// <summary>
-    /// Karakter gövdesi, atkısı, ayak halkası, hasar parlaması ve
-    /// karakterin üstündeki ince can barı ile üretim çubuğunu yönetir.
-    /// SRS: 3.13, FR-11, FR-23, FR-51, FR-53, FR-63, FR-64, UI-07
+    /// Karakterin görseli (CharacterVisual.prefab, Character.prefab içinde). Yalnızca değer okur ve GameEvents dinler.
+    /// - Baltalı gövde: yön (Facing) ve yürüme/bekleme (Velocity) animasyonu, atkı (Scarf), oyuncu halkası (FR-11, FR-63, 3.13).
+    /// - Balta savurma: Swung gelince vuruş kareleri ve vuruş anında savurma yayı (SRS 3.3); ulti hazırken parıltı, hazırlanırken parlama (FR-28, 3.4).
+    /// - Yaprak yığını: tehdit kademesine göre 6/12/18 yaprak (SRS 3.9, FR-60–FR-62).
+    /// - Hasar parlaması 0,1 sn beyaz (FR-23); çalılıkta oyuncu yarı saydam, görünmeyen karakter tamamen gizli (FR-51, FR-53).
+    /// - Karakter üstü can çubuğu (FR-64) ve tarif üretim çubuğu (UI-07).
+    /// Kare düzeni (16×24 gövde/atkı, 24×24 baltalı): satır 0 aşağı, 1 yukarı, 2 yan (sol için aynalanır); 0–1 bekleme, 2–5 yürüme.
     /// </summary>
     public class CharacterVisual : MonoBehaviour
     {
-        private const string SortingLayerName = "Characters";
-        private const int FrameCountPerRow = 6;
+        const string CharactersLayer = "Characters";
+        const string PileLayer = "Pile";
+        const string EffectsLayer = "Effects";
+        const int FramesPerRow = 6;
+        const int SwingFramesPerRow = 4;
 
-        [Header("Karakter Sprite Dizileri (18 Kare: 0-5 Aşağı, 6-11 Yukarı, 12-17 Yan)")]
-        [SerializeField] private Sprite[] bodySprites;
-        [SerializeField] private Sprite[] blueScarfSprites;
-        [SerializeField] private Sprite[] purpleScarfSprites;
-        [SerializeField] private Sprite[] whiteScarfSprites;
-        [SerializeField] private Sprite[] blackScarfSprites;
-        [SerializeField] private Sprite playerRingSprite;
+        [Header("Baltalı gövde (18 kare) ve vuruş (12 kare: yön başına 4)")]
+        [SerializeField] Sprite[] walkSprites;
+        [SerializeField] Sprite[] swingSprites;
 
-        [Header("Üst İnce Can Barı Ayarları (FR-64)")]
-        [SerializeField] private bool showHealthBarOnPlayer = true;
-        [SerializeField] private bool showHealthBarOnBots = true;
-        [SerializeField] private float barHeightOffset = 1.15f;
-        [SerializeField] private float barWidthUnits = 0.95f;
-        [SerializeField] private float barThicknessUnits = 0.12f;
+        [Header("Atkılar (18'er kare, gövdeyle aynı düzen)")]
+        [SerializeField] Sprite[] blueScarfSprites;
+        [SerializeField] Sprite[] purpleScarfSprites;
+        [SerializeField] Sprite[] whiteScarfSprites;
+        [SerializeField] Sprite[] blackScarfSprites;
+        [SerializeField] Sprite playerRingSprite;
 
-        [Header("Animasyon Ayarları")]
-        [SerializeField] private float idleFps = 4f;
-        [SerializeField] private float walkFps = 8f;
-        [SerializeField] private float moveThresholdSq = 0.01f;
-        [SerializeField] private float defaultBushAlpha = 0.5f;
+        [Header("Balta")]
+        [SerializeField] Sprite swingArcSprite;
+        [SerializeField] Color ultiReadyGlow = new Color(1f, 0.85f, 0.25f, 0.55f);
+        [SerializeField] Color ultiWindupGlow = new Color(1f, 0.95f, 0.6f, 0.85f);
+        [SerializeField] float glowPulseHz = 2f;
+        [SerializeField] float glowScale = 1.12f;
 
-        private Character _character;
-        private SpriteRenderer _bodyRenderer;
-        private SpriteRenderer _scarfRenderer;
-        private SpriteRenderer _playerRingRenderer;
+        [Header("Yaprak yığını")]
+        [SerializeField] Sprite[] pileLeafSprites;
+        [SerializeField] float pileSwayDeg = 12f;
+        [SerializeField] float pileSwayHz = 0.8f;
 
-        // İnce Can Barı Bileşenleri
-        private Transform _barsRoot;
-        private SpriteRenderer _hpBorderRenderer;
-        private SpriteRenderer _hpFillRenderer;
+        [Header("Parlama (siluet malzemesi)")]
+        [SerializeField] Material flashMaterial;
 
-        // Tarif Üretim Barı Bileşenleri (UI-07: 1,5 sn)
-        private GameObject _craftBarGroup;
-        private SpriteRenderer _craftBorderRenderer;
-        private SpriteRenderer _craftFillRenderer;
+        [Header("Karakter üstü çubuklar (FR-64, UI-07)")]
+        [SerializeField] bool showHealthBarOnPlayer = true;
+        [SerializeField] bool showHealthBarOnBots = true;
+        [SerializeField] float barHeightOffset = 1.7f;
+        [SerializeField] float barWidthUnits = 0.95f;
+        [SerializeField] float barThicknessUnits = 0.12f;
 
-        private static Sprite _unitPixelSprite;
-        private float _animTimer;
-        private float _hitFlashTimer;
+        [Header("Animasyon")]
+        [SerializeField] float idleFps = 4f;
+        [SerializeField] float walkFps = 8f;
+        [SerializeField] float moveThresholdSq = 0.01f;
 
-        private void Awake()
+        Character _character;
+        SpriteRenderer _ring, _glow, _body, _scarf, _flash, _arc;
+        Transform _barsRoot, _pileRoot;
+        SpriteRenderer _hpBorder, _hpFill, _craftBorder, _craftFill;
+        GameObject _craftBarGroup;
+        SpriteRenderer[] _pileLeaves = new SpriteRenderer[0];
+        float[] _pileAngles = new float[0];
+
+        static Sprite _unitPixel;
+        float _animTimer;
+        float _flashUntil = float.NegativeInfinity;
+        float _swingStart = float.NegativeInfinity;
+        Vector2 _swingFacing = Vector2.right;
+        int _pileCount;
+        float _pileFrom, _pileTo, _pileGrowStart = float.NegativeInfinity;
+
+        void Awake()
         {
             _character = GetComponentInParent<Character>();
-            EnsureUnitPixelSprite();
-            EnsureCharacterRenderers();
-            EnsureOverheadBars();
-        }
-
-        private void OnEnable()
-        {
-            GameEvents.Damaged += OnCharacterDamaged;
-        }
-
-        private void OnDisable()
-        {
-            GameEvents.Damaged -= OnCharacterDamaged;
-        }
-
-        private void LateUpdate()
-        {
-            if (_character == null)
+            EnsureUnitPixel();
+            _ring = Child("PlayerRing", CharactersLayer, -2);
+            _glow = Child("Glow", CharactersLayer, -1);
+            _body = Child("Body", CharactersLayer, 0);
+            _scarf = Child("Scarf", CharactersLayer, 1);
+            _flash = Child("Flash", CharactersLayer, 2);
+            _arc = Child("SwingArc", EffectsLayer, 0);
+            _ring.sprite = playerRingSprite;
+            _arc.sprite = swingArcSprite;
+            if (flashMaterial != null)
             {
-                _character = GetComponentInParent<Character>();
-                if (_character == null) return;
+                _glow.sharedMaterial = flashMaterial;
+                _flash.sharedMaterial = flashMaterial;
+            }
+            _flash.color = Color.white;
+            _glow.transform.localScale = Vector3.one * glowScale;
+            EnsureBars();
+            _pileRoot = new GameObject("Pile").transform;
+            _pileRoot.SetParent(transform, false);
+        }
+
+        void OnEnable()
+        {
+            GameEvents.Damaged += OnDamaged;
+            GameEvents.Swung += OnSwung;
+            GameEvents.ThreatChanged += OnThreatChanged;
+        }
+
+        void OnDisable()
+        {
+            GameEvents.Damaged -= OnDamaged;
+            GameEvents.Swung -= OnSwung;
+            GameEvents.ThreatChanged -= OnThreatChanged;
+        }
+
+        void Start() => SetPileTier(_character.PileTier, true);
+
+        void OnDamaged(Character victim, DamageInfo info)
+        {
+            if (victim == _character) _flashUntil = Time.time + Services.Config.character.hitFlashSec;   // FR-23
+        }
+
+        void OnSwung(Character c)
+        {
+            if (c != _character) return;
+            _swingStart = Time.time;
+            _swingFacing = c.Facing;
+        }
+
+        void OnThreatChanged(Character c, int score, PileTier tier)
+        {
+            if (c == _character) SetPileTier(tier, false);
+        }
+
+        void LateUpdate()
+        {
+            if (_character == null) return;
+            bool visible = _character.IsAlive && _character.VisibleToPlayer;   // FR-51, FR-80
+            _body.enabled = _scarf.enabled = visible;
+            _ring.enabled = visible && _character.IsPlayer;
+            _barsRoot.gameObject.SetActive(visible);
+            _pileRoot.gameObject.SetActive(visible);
+            if (!visible)
+            {
+                _glow.enabled = _flash.enabled = _arc.enabled = false;
+                return;
             }
 
-            UpdateVisuals(Time.deltaTime);
+            float alpha = _character.IsPlayer && _character.IsInBush ? Services.Config.bushes.playerInBushAlpha : 1f;   // FR-53
+            UpdateBody(alpha);
+            UpdateGlowAndFlash(alpha);
+            UpdateArc(alpha);
+            UpdatePile(alpha);
+            UpdateHealthBar(alpha);
+            UpdateCraftBar();
         }
 
-        private void OnCharacterDamaged(Character victim, DamageInfo info)
+        // ---------------- Gövde, atkı, vuruş ----------------
+
+        void UpdateBody(float alpha)
         {
-            if (victim != null && victim == _character)
+            var axe = Services.Config.axe;
+            float sinceSwing = Time.time - _swingStart;
+            // Vuruş kareleri: hasar anına (hitDelaySec) kadar 0–1 (kaldırma), sonra 2 (vuruş) ve 3 (bitiş), her biri hitDelaySec.
+            bool swinging = sinceSwing < axe.hitDelaySec * 3f;
+            Vector2 facing = swinging ? _swingFacing : _character.Facing;
+            if (facing.sqrMagnitude < 0.0001f) facing = Vector2.down;
+
+            int row;
+            bool flip = false;
+            if (Mathf.Abs(facing.x) >= Mathf.Abs(facing.y)) { row = 2; flip = facing.x < 0f; }
+            else row = facing.y > 0f ? 1 : 0;
+
+            bool moving = _character.Velocity.sqrMagnitude > moveThresholdSq;
+            _animTimer += Time.deltaTime * (moving ? walkFps : idleFps);
+            int col = moving ? 2 + Mathf.FloorToInt(_animTimer) % 4 : Mathf.FloorToInt(_animTimer) % 2;
+
+            Sprite body;
+            if (swinging && swingSprites != null && swingSprites.Length >= 3 * SwingFramesPerRow)
             {
-                // FR-23: Hasar alan karakter 0,1 sn beyaz yanıp söner
-                _hitFlashTimer = 0.1f;
+                int swingCol = sinceSwing < axe.hitDelaySec ? (sinceSwing < axe.hitDelaySec * 0.5f ? 0 : 1)
+                    : sinceSwing < axe.hitDelaySec * 2f ? 2 : 3;
+                body = swingSprites[row * SwingFramesPerRow + swingCol];
+                col = 0;   // atkı vuruşta bekleme karesinde durur
+            }
+            else body = Pick(walkSprites, row * FramesPerRow + col);
+
+            _body.sprite = body;
+            _body.flipX = _scarf.flipX = _flash.flipX = _glow.flipX = flip;
+            _scarf.sprite = Pick(ScarfSprites(_character.Scarf), row * FramesPerRow + col);
+            _flash.sprite = _glow.sprite = body;
+
+            var tint = new Color(1f, 1f, 1f, alpha);
+            _body.color = _scarf.color = tint;
+            _ring.color = tint;
+        }
+
+        // Hasar: 0,1 sn beyaz siluet (FR-23). Ulti hazır: altın parıltı nabzı (SRS 3.3); hazırlanırken: güçlü parlama (SRS 3.4).
+        void UpdateGlowAndFlash(float alpha)
+        {
+            bool flashing = Time.time < _flashUntil;
+            _flash.enabled = flashing && flashMaterial != null;
+            if (_flash.enabled) _flash.color = new Color(1f, 1f, 1f, alpha);
+
+            var abilities = _character.Abilities;
+            bool windup = abilities != null && abilities.UltiWindingUp;
+            bool ready = abilities != null && abilities.State(AbilityId.Ulti) == AbilityState.Ready;
+            _glow.enabled = (windup || ready) && flashMaterial != null;
+            if (!_glow.enabled) return;
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * glowPulseHz * Mathf.PI * 2f);
+            Color c = windup ? ultiWindupGlow : ultiReadyGlow;
+            c.a *= (windup ? 1f : pulse) * alpha;
+            _glow.color = c;
+            // Ayaktaki pivottan büyütülen parıltı yukarı kayar; görselin ortasına göre hizala.
+            if (_glow.sprite != null) _glow.transform.localPosition = new Vector3(0f, -(glowScale - 1f) * _glow.sprite.bounds.center.y, 0f);
+        }
+
+        // Savurma yayı: hasar anında (hitDelaySec) bakış yönünde görünür, bir hitDelaySec içinde söner (SRS 3.3).
+        void UpdateArc(float alpha)
+        {
+            float t = Time.time - _swingStart - Services.Config.axe.hitDelaySec;
+            float life = Services.Config.axe.hitDelaySec;
+            _arc.enabled = swingArcSprite != null && t >= 0f && t < life;
+            if (!_arc.enabled) return;
+            float angle = Mathf.Atan2(_swingFacing.y, _swingFacing.x) * Mathf.Rad2Deg;
+            _arc.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
+            _arc.color = new Color(1f, 1f, 1f, alpha * (1f - t / life));
+        }
+
+        // ---------------- Yaprak yığını (SRS 3.9) ----------------
+
+        void SetPileTier(PileTier tier, bool instant)
+        {
+            var threat = Services.Config.threat;
+            int count = threat.pileLeafCount[(int)tier];
+            float radius = Units.ToUnits(Services.Config.character.radiusPx) * threat.pileRadiusScale[(int)tier];
+            _pileFrom = instant ? radius : CurrentPileRadius();
+            _pileTo = radius;
+            _pileGrowStart = instant ? float.NegativeInfinity : Time.time;
+            EnsurePileLeaves(count);
+            _pileCount = count;
+        }
+
+        float CurrentPileRadius()
+        {
+            float grow = Services.Config.threat.pileGrowSec;
+            float k = grow > 0f ? Mathf.Clamp01((Time.time - _pileGrowStart) / grow) : 1f;
+            return Mathf.Lerp(_pileFrom, _pileTo, k);
+        }
+
+        void EnsurePileLeaves(int count)
+        {
+            if (count > _pileLeaves.Length)
+            {
+                var leaves = new SpriteRenderer[count];
+                var angles = new float[count];
+                for (int i = 0; i < count; i++)
+                {
+                    if (i < _pileLeaves.Length) { leaves[i] = _pileLeaves[i]; angles[i] = _pileAngles[i]; continue; }
+                    var sr = new GameObject("Leaf" + i).AddComponent<SpriteRenderer>();
+                    sr.transform.SetParent(_pileRoot, false);
+                    sr.sortingLayerName = PileLayer;
+                    sr.sortingOrder = i;
+                    if (pileLeafSprites != null && pileLeafSprites.Length > 0) sr.sprite = pileLeafSprites[i % pileLeafSprites.Length];
+                    leaves[i] = sr;
+                }
+                _pileLeaves = leaves;
+                _pileAngles = angles;
+            }
+            for (int i = 0; i < _pileLeaves.Length; i++)
+            {
+                _pileLeaves[i].enabled = i < count;
+                // Yapraklar halkaya eşit aralıkla, her kademede yeniden dağılır; çift sıralar yarım adım kaydırılır.
+                if (i < count) _pileAngles[i] = 360f * i / count + (i % 2) * 180f / count;
             }
         }
 
-        private static void EnsureUnitPixelSprite()
+        void UpdatePile(float alpha)
         {
-            if (_unitPixelSprite != null) return;
-            Texture2D tex = new Texture2D(1, 1, TextureFormat.RGBA32, false)
+            if (_pileCount == 0) return;
+            float radius = CurrentPileRadius();
+            float sway = Mathf.Sin(Time.time * pileSwayHz * Mathf.PI * 2f) * pileSwayDeg;
+            var tint = new Color(1f, 1f, 1f, alpha);
+            for (int i = 0; i < _pileCount; i++)
             {
-                filterMode = FilterMode.Point,
-                wrapMode = TextureWrapMode.Clamp
-            };
+                float a = (_pileAngles[i] + sway) * Mathf.Deg2Rad;
+                _pileLeaves[i].transform.localPosition = new Vector3(Mathf.Cos(a) * radius, Mathf.Sin(a) * radius * 0.6f, 0f);
+                _pileLeaves[i].transform.localRotation = Quaternion.Euler(0f, 0f, _pileAngles[i] + sway * 2f);
+                _pileLeaves[i].color = tint;
+            }
+        }
+
+        // ---------------- Karakter üstü çubuklar ----------------
+
+        void UpdateHealthBar(float alpha)
+        {
+            bool show = _character.IsPlayer ? showHealthBarOnPlayer : showHealthBarOnBots;   // FR-64
+            _hpBorder.enabled = _hpFill.enabled = show;
+            if (!show) return;
+            float ratio = Mathf.Clamp01((float)_character.Health.Current / Mathf.Max(1, _character.Health.Max));
+            float half = barWidthUnits * 0.5f, pad = 0.04f;
+            _hpBorder.transform.localPosition = new Vector3(-half - pad, 0f, 0f);
+            _hpBorder.transform.localScale = new Vector3(barWidthUnits + pad * 2f, barThicknessUnits + pad * 2f, 1f);
+            _hpFill.transform.localPosition = new Vector3(-half, 0f, 0f);
+            _hpFill.transform.localScale = new Vector3(barWidthUnits * ratio, barThicknessUnits, 1f);
+            Color color = !_character.IsPlayer ? new Color(0.90f, 0.22f, 0.20f)
+                : ratio > 0.5f ? new Color(0.22f, 0.85f, 0.27f)
+                : ratio > 0.25f ? new Color(1f, 0.85f, 0.13f) : new Color(0.90f, 0.18f, 0.18f);
+            color.a = alpha;
+            _hpFill.color = color;
+        }
+
+        void UpdateCraftBar()
+        {
+            bool crafting = _character.Crafting.IsCrafting;
+            if (_craftBarGroup.activeSelf != crafting) _craftBarGroup.SetActive(crafting);
+            if (!crafting) return;
+            float progress = Mathf.Clamp01(_character.Crafting.Progress01);
+            float half = barWidthUnits * 0.5f, pad = 0.03f, thickness = barThicknessUnits * 0.8f;
+            _craftBorder.transform.localPosition = new Vector3(-half - pad, 0f, 0f);
+            _craftBorder.transform.localScale = new Vector3(barWidthUnits + pad * 2f, thickness + pad * 2f, 1f);
+            _craftFill.transform.localPosition = new Vector3(-half, 0f, 0f);
+            _craftFill.transform.localScale = new Vector3(barWidthUnits * progress, thickness, 1f);
+        }
+
+        // ---------------- Kurulum ----------------
+
+        Sprite[] ScarfSprites(ScarfColor scarf) => scarf switch
+        {
+            ScarfColor.Purple => purpleScarfSprites,
+            ScarfColor.White => whiteScarfSprites,
+            ScarfColor.Black => blackScarfSprites,
+            _ => blueScarfSprites,
+        };
+
+        static Sprite Pick(Sprite[] sprites, int index) =>
+            sprites != null && index >= 0 && index < sprites.Length ? sprites[index] : null;
+
+        SpriteRenderer Child(string childName, string layer, int order)
+        {
+            var go = new GameObject(childName);
+            go.transform.SetParent(transform, false);
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingLayerName = layer;
+            sr.sortingOrder = order;
+            return sr;
+        }
+
+        void EnsureBars()
+        {
+            _barsRoot = new GameObject("OverheadBars").transform;
+            _barsRoot.SetParent(transform, false);
+            _barsRoot.localPosition = new Vector3(0f, barHeightOffset, 0f);
+            _hpBorder = Bar(_barsRoot, "HpBarBorder", 10, new Color(0.10f, 0.06f, 0.04f, 0.92f));
+            _hpFill = Bar(_barsRoot, "HpBarFill", 11, Color.green);
+            _craftBarGroup = new GameObject("CraftBarGroup");
+            _craftBarGroup.transform.SetParent(_barsRoot, false);
+            _craftBarGroup.transform.localPosition = new Vector3(0f, barThicknessUnits + 0.08f, 0f);
+            _craftBorder = Bar(_craftBarGroup.transform, "CraftBorder", 10, new Color(0.10f, 0.06f, 0.04f, 0.92f));
+            _craftFill = Bar(_craftBarGroup.transform, "CraftFill", 11, new Color(1f, 0.85f, 0.13f, 1f));
+            _craftBarGroup.SetActive(false);
+        }
+
+        static SpriteRenderer Bar(Transform parent, string barName, int order, Color color)
+        {
+            var go = new GameObject(barName);
+            go.transform.SetParent(parent, false);
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = _unitPixel;
+            sr.color = color;
+            sr.sortingLayerName = CharactersLayer;
+            sr.sortingOrder = order;
+            return sr;
+        }
+
+        // Çubuklar için 1×1 beyaz piksel; pivot sol-orta, böylece çubuk soldan sağa dolar.
+        static void EnsureUnitPixel()
+        {
+            if (_unitPixel != null) return;
+            var tex = new Texture2D(1, 1, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
             tex.SetPixel(0, 0, Color.white);
             tex.Apply();
-            // Pivot sol-orta (0, 0.5f) yapıyoruz ki bar soldan sağa doğru incelip azalsın
-            _unitPixelSprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0f, 0.5f), 1f);
-        }
-
-        private void EnsureCharacterRenderers()
-        {
-            _playerRingRenderer = GetOrCreateChildRenderer("PlayerRing", -1);
-            _bodyRenderer       = GetOrCreateChildRenderer("Body", 0);
-            _scarfRenderer      = GetOrCreateChildRenderer("Scarf", 1);
-
-            if (playerRingSprite != null)
-            {
-                _playerRingRenderer.sprite = playerRingSprite;
-            }
-        }
-
-        private void EnsureOverheadBars()
-        {
-            Transform existing = transform.Find("OverheadBars");
-            if (existing == null)
-            {
-                GameObject rootObj = new GameObject("OverheadBars");
-                rootObj.transform.SetParent(transform, false);
-                _barsRoot = rootObj.transform;
-            }
-            else
-            {
-                _barsRoot = existing;
-            }
-            _barsRoot.localPosition = new Vector3(0f, barHeightOffset, 0f);
-
-            // 1. İnce Can Barı (Arka Çerçeve + İç Dolgu)
-            _hpBorderRenderer = GetOrCreateBarRenderer(_barsRoot, "HpBarBorder", 10, new Color(0.10f, 0.06f, 0.04f, 0.92f));
-            _hpFillRenderer   = GetOrCreateBarRenderer(_barsRoot, "HpBarFill",   11, new Color(0.22f, 0.85f, 0.27f, 1f));
-
-            // 2. Üstte 1,5 sn Dolan Tarif Üretim Çubuğu (UI-07)
-            Transform craftTr = _barsRoot.Find("CraftBarGroup");
-            if (craftTr == null)
-            {
-                _craftBarGroup = new GameObject("CraftBarGroup");
-                _craftBarGroup.transform.SetParent(_barsRoot, false);
-                _craftBarGroup.transform.localPosition = new Vector3(0f, barThicknessUnits + 0.08f, 0f);
-            }
-            else
-            {
-                _craftBarGroup = craftTr.gameObject;
-            }
-
-            _craftBorderRenderer = GetOrCreateBarRenderer(_craftBarGroup.transform, "CraftBorder", 10, new Color(0.10f, 0.06f, 0.04f, 0.92f));
-            _craftFillRenderer   = GetOrCreateBarRenderer(_craftBarGroup.transform, "CraftFill",   11, new Color(1.00f, 0.85f, 0.13f, 1f));
-        }
-
-        private SpriteRenderer GetOrCreateChildRenderer(string childName, int sortingOrder)
-        {
-            Transform tr = transform.Find(childName);
-            if (tr == null)
-            {
-                GameObject go = new GameObject(childName);
-                go.transform.SetParent(transform, false);
-                tr = go.transform;
-            }
-            SpriteRenderer sr = tr.GetComponent<SpriteRenderer>();
-            if (sr == null) sr = tr.gameObject.AddComponent<SpriteRenderer>();
-            sr.sortingLayerName = SortingLayerName;
-            sr.sortingOrder = sortingOrder;
-            return sr;
-        }
-
-        private SpriteRenderer GetOrCreateBarRenderer(Transform parent, string name, int sortingOrder, Color color)
-        {
-            Transform tr = parent.Find(name);
-            if (tr == null)
-            {
-                GameObject go = new GameObject(name);
-                go.transform.SetParent(parent, false);
-                tr = go.transform;
-            }
-            SpriteRenderer sr = tr.GetComponent<SpriteRenderer>();
-            if (sr == null) sr = tr.gameObject.AddComponent<SpriteRenderer>();
-            sr.sprite = _unitPixelSprite;
-            sr.color = color;
-            sr.sortingLayerName = SortingLayerName;
-            sr.sortingOrder = sortingOrder;
-            return sr;
-        }
-
-        private void UpdateVisuals(float dt)
-        {
-            // 1. Görünürlük ve Ölüm Kontrolü (FR-51, FR-64, FR-80)
-            bool visible = _character.IsAlive && _character.VisibleToPlayer;
-            _bodyRenderer.enabled = visible;
-            _scarfRenderer.enabled = visible;
-            _playerRingRenderer.enabled = visible && _character.IsPlayer;
-
-            if (_barsRoot != null)
-            {
-                _barsRoot.gameObject.SetActive(visible);
-            }
-
-            if (!visible) return;
-
-            // 2. Yön (Facing) ve Hareket (Velocity) Animasyonu
-            Vector2 facing = _character.Facing.sqrMagnitude > 0.0001f ? _character.Facing : Vector2.down;
-            int dirRow;
-            bool flipX = false;
-
-            if (Mathf.Abs(facing.x) >= Mathf.Abs(facing.y))
-            {
-                dirRow = 2; // Yan
-                flipX = facing.x < -0.001f;
-            }
-            else if (facing.y > 0f)
-            {
-                dirRow = 1; // Yukarı
-            }
-            else
-            {
-                dirRow = 0; // Aşağı
-            }
-
-            bool isMoving = _character.Velocity.sqrMagnitude > moveThresholdSq;
-            _animTimer += dt * (isMoving ? walkFps : idleFps);
-
-            int col = isMoving ? 2 + (Mathf.FloorToInt(_animTimer) % 4) : (Mathf.FloorToInt(_animTimer) % 2);
-            int idx = dirRow * FrameCountPerRow + col;
-
-            _bodyRenderer.flipX = flipX;
-            if (bodySprites != null && idx >= 0 && idx < bodySprites.Length)
-            {
-                _bodyRenderer.sprite = bodySprites[idx];
-            }
-
-            _scarfRenderer.flipX = flipX;
-            Sprite[] scarfArr = GetScarfSpriteArray(_character.Scarf);
-            if (scarfArr != null && idx >= 0 && idx < scarfArr.Length)
-            {
-                _scarfRenderer.sprite = scarfArr[idx];
-            }
-
-            // 3. Çalılık Yarı Saydamlığı (FR-53) ve Hasar Parlaması (FR-23)
-            if (_hitFlashTimer > 0f)
-            {
-                _hitFlashTimer -= dt;
-            }
-
-            float alpha = (_character.IsPlayer && _character.IsInBush) ? ReadPlayerInBushAlpha() : 1f;
-            Color tint = (_hitFlashTimer > 0f) ? new Color(1f, 0.35f, 0.35f, alpha) : new Color(1f, 1f, 1f, alpha);
-
-            _bodyRenderer.color = tint;
-            _scarfRenderer.color = tint;
-            if (_playerRingRenderer.enabled)
-            {
-                _playerRingRenderer.color = new Color(1f, 1f, 1f, alpha);
-            }
-
-            // 4. Karakter Üstü İnce Can Barı Güncellemesi (Hasar yedikçe azalır - FR-64)
-            UpdateOverheadHealthBar(alpha);
-
-            // 5. Karakter Üstü 1,5 sn Tarif Üretim Çubuğu (UI-07)
-            UpdateOverheadCraftBar();
-        }
-
-        private void UpdateOverheadHealthBar(float alpha)
-        {
-            bool showHp = _character.IsPlayer ? showHealthBarOnPlayer : showHealthBarOnBots;
-            _hpBorderRenderer.enabled = showHp;
-            _hpFillRenderer.enabled = showHp;
-            if (!showHp || _character.Health == null) return;
-
-            float maxHp = Mathf.Max(1, _character.Health.Max);
-            float curHp = Mathf.Clamp(_character.Health.Current, 0, maxHp);
-            float ratio = curHp / maxHp;
-
-            float halfW = barWidthUnits * 0.5f;
-            float borderPad = 0.04f;
-
-            // Arka Siyah Çerçeve
-            _hpBorderRenderer.transform.localPosition = new Vector3(-halfW - borderPad, 0f, 0f);
-            _hpBorderRenderer.transform.localScale = new Vector3(barWidthUnits + borderPad * 2f, barThicknessUnits + borderPad * 2f, 1f);
-
-            // İç Can Dolgusu (Hasar yedikçe ratio azalır ve bar incelir/kısalır)
-            _hpFillRenderer.transform.localPosition = new Vector3(-halfW, 0f, 0f);
-            _hpFillRenderer.transform.localScale = new Vector3(barWidthUnits * ratio, barThicknessUnits, 1f);
-
-            // Oyuncunun barı yeşil (canı %30 altına inince sarı/kırmızı), rakiplerin barı kırmızı-turuncu
-            Color barColor;
-            if (_character.IsPlayer)
-            {
-                barColor = ratio > 0.5f
-                    ? new Color(0.22f, 0.85f, 0.27f, alpha)
-                    : (ratio > 0.25f ? new Color(1f, 0.85f, 0.13f, alpha) : new Color(0.90f, 0.18f, 0.18f, alpha));
-            }
-            else
-            {
-                barColor = new Color(0.90f, 0.22f, 0.20f, alpha);
-            }
-            _hpFillRenderer.color = barColor;
-        }
-
-        private void UpdateOverheadCraftBar()
-        {
-            bool isCrafting = _character.Crafting != null && _character.Crafting.IsCrafting;
-            if (_craftBarGroup.activeSelf != isCrafting)
-            {
-                _craftBarGroup.SetActive(isCrafting);
-            }
-            if (!isCrafting) return;
-
-            float progress = Mathf.Clamp01(_character.Crafting.Progress01);
-            float halfW = barWidthUnits * 0.5f;
-            float borderPad = 0.03f;
-
-            _craftBorderRenderer.transform.localPosition = new Vector3(-halfW - borderPad, 0f, 0f);
-            _craftBorderRenderer.transform.localScale = new Vector3(barWidthUnits + borderPad * 2f, (barThicknessUnits * 0.8f) + borderPad * 2f, 1f);
-
-            _craftFillRenderer.transform.localPosition = new Vector3(-halfW, 0f, 0f);
-            _craftFillRenderer.transform.localScale = new Vector3(barWidthUnits * progress, barThicknessUnits * 0.8f, 1f);
-        }
-
-        private Sprite[] GetScarfSpriteArray(ScarfColor scarf)
-        {
-            switch (scarf)
-            {
-                case ScarfColor.Blue:   return blueScarfSprites;
-                case ScarfColor.Purple: return purpleScarfSprites;
-                case ScarfColor.White:  return whiteScarfSprites;
-                case ScarfColor.Black:  return blackScarfSprites;
-                default:                return blueScarfSprites;
-            }
-        }
-
-        private float ReadPlayerInBushAlpha()
-        {
-            try
-            {
-                object config = Services.Config;
-                if (config == null) return defaultBushAlpha;
-                Type ct = config.GetType();
-                object bushes = ct.GetField("bushes", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase)?.GetValue(config)
-                             ?? ct.GetProperty("bushes", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase)?.GetValue(config);
-                if (bushes == null) return defaultBushAlpha;
-                Type bt = bushes.GetType();
-                object val = bt.GetField("playerInBushAlpha", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase)?.GetValue(bushes)
-                          ?? bt.GetProperty("playerInBushAlpha", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase)?.GetValue(bushes);
-                if (val != null) return Convert.ToSingle(val);
-            }
-            catch { }
-            return defaultBushAlpha;
+            _unitPixel = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0f, 0.5f), 1f);
         }
     }
 }
