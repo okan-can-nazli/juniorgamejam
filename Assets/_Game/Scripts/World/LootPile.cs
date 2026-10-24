@@ -24,6 +24,8 @@ namespace LeafBrawl.World
 
         public Vector2 Position => transform.position;
         public bool IsLoot => true;
+        /// <summary>IPickup.Type: ganimet birden çok tür taşır, bu yüzden anlamsız; IsLoot true iken okuyanlar yok sayar.</summary>
+        public LeafType Type => LeafType.Red;
 
         /// <param name="counts">LeafType sırasıyla gerçek adetler (K, S, Y, T).</param>
         public static LootPile Create(Transform parent, Vector2 position, int[] counts)
