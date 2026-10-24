@@ -128,7 +128,7 @@ public struct DamageInfo { public int Amount; public Character Source; public bo
 public interface IDamageable { Vector2 Position { get; } bool IsAlive { get; } void ApplyDamage(DamageInfo info); }
 public interface IDamageInterceptor { bool TryAbsorb(DamageInfo info); }   // true: hasar tamamen emildi (Kalkan)
 public interface ITree : IDamageable { bool Choppable { get; } bool Felled { get; } }
-public interface IPickup { Vector2 Position { get; } bool IsLoot { get; } }
+public interface IPickup { Vector2 Position { get; } bool IsLoot { get; } LeafType Type { get; } }   // Type: ganimette (IsLoot) yok sayılır
 
 // ---- Shared/Services.cs ---- servis bulucu; kayıtlı değilse Stubs/ altındaki sahte sürüm döner
 public static class Services {
