@@ -103,12 +103,12 @@ namespace LeafBrawl.Bots
             return InBounds(x, y) && !_blocked[y * _size + x];
         }
 
-        /// <summary>a'dan b'ye düz çizgi kapalı hücreye girmiyor mu (yarım hücre adımlarla).</summary>
+        /// <summary>a'dan b'ye düz çizgi kapalı hücreye girmiyor mu (çeyrek hücre adımlarla).</summary>
         public bool LineClear(Vector2 a, Vector2 b)
         {
             ApplyDirty();
             float length = Vector2.Distance(a, b);
-            int steps = Mathf.CeilToInt(length / (_cell * 0.5f));
+            int steps = Mathf.CeilToInt(length / (_cell * 0.25f));
             for (int i = 1; i <= steps; i++)
                 if (!IsOpen(Vector2.Lerp(a, b, (float)i / steps))) return false;
             return true;
@@ -122,7 +122,7 @@ namespace LeafBrawl.Bots
             return index < 0 ? pos : Center(index % _size, index / _size);
         }
 
-        /// <summary>A* yolu: from → to. Yol hücre merkezlerinden oluşur ve düz çizgiyle kısaltılır; son nokta hedeftir.</summary>
+        /// <summary>A* yolu: from → to. Yol hücre merkezlerinden oluşur ve düz çizgiyle kısaltılır; son nokta hedef ya da ona en yakın açık hücredir.</summary>
         public bool FindPath(Vector2 from, Vector2 to, List<Vector2> path)
         {
             path.Clear();
@@ -166,7 +166,8 @@ namespace LeafBrawl.Bots
             for (int i = goal; i != -1; i = _parent[i]) path.Add(Center(i % _size, i / _size));
             path.Reverse();
             if (path.Count > 0) path.RemoveAt(0);   // başlangıç hücresi
-            path.Add(to);
+            // Hedefe karakter sığmıyorsa (ör. ulu ağacın merkezi) yol ona en yakın açık hücrede biter.
+            if (!Services.World.IsBlocked(to, _radiusPx)) path.Add(to);
             Smooth(from, path);
             return true;
         }

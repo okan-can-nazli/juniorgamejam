@@ -36,6 +36,8 @@ namespace LeafBrawl.Bots
         readonly HashSet<IPickup> _ignoredPickups = new HashSet<IPickup>();
 
         public BotState State { get; private set; } = BotState.Collect;
+        /// <summary>Saldır'da hedef, Kaç'ta kaçılan rakip (debug ve görsel için).</summary>
+        public Character Target => _target;
 
         void Awake() => _self = GetComponent<Character>();
 
@@ -123,7 +125,7 @@ namespace LeafBrawl.Bots
             return best;
         }
 
-        // BOT-07: en yakın görünen yaprak/ganimet → alan içindeki en yakın kesilebilir ağaç → ulu ağaç.
+        // BOT-07: alan içindeki en yakın görünen yaprak/ganimet → alan içindeki en yakın kesilebilir ağaç → ulu ağaç.
         void ChooseCollectGoal()
         {
             var previousPickup = _pickupGoal;
@@ -134,7 +136,7 @@ namespace LeafBrawl.Bots
             float best = float.MaxValue;
             foreach (var pickup in _perception.Pickups)
             {
-                if (pickup == null || _ignoredPickups.Contains(pickup)) continue;
+                if (pickup == null || _ignoredPickups.Contains(pickup) || !SafeToGo(pickup.Position)) continue;
                 float d = (pickup.Position - _self.Position).sqrMagnitude;
                 if (d < best) { best = d; _pickupGoal = pickup; }
             }
@@ -148,7 +150,7 @@ namespace LeafBrawl.Bots
             best = float.MaxValue;
             foreach (var tree in _perception.Trees)
             {
-                if (tree == null || !tree.Choppable || tree.Felled || !Services.Zone.IsInside(tree.Position)) continue;
+                if (tree == null || !tree.Choppable || tree.Felled || !SafeToGo(tree.Position)) continue;
                 float d = (tree.Position - _self.Position).sqrMagnitude;
                 if (d < best) { best = d; _treeGoal = tree; }
             }
@@ -315,6 +317,14 @@ namespace LeafBrawl.Bots
             var map = Services.Config.map;
             float trunkPx = ReferenceEquals(tree, Services.World.GreatTree) ? map.greatTreeTrunkRadiusPx : map.treeTrunkRadiusPx;
             return centerDistance <= Units.ToUnits(Services.Config.axe.rangePx + trunkPx);
+        }
+
+        // Topla hedefi alan içinde ve zoneLookaheadSec boyunca içeride kalacak olmalı; yoksa bot Alana dön ile
+        // Topla arasında gidip gelir (BOT-04 önceliği).
+        static bool SafeToGo(Vector2 pos)
+        {
+            var zone = Services.Zone;
+            return zone.IsInside(pos) && !zone.WillBeOutsideWithin(pos, Services.Config.bots.zoneLookaheadSec);
         }
 
         float HpRatio() => _self.Health.Max > 0 ? (float)_self.Health.Current / _self.Health.Max : 0f;

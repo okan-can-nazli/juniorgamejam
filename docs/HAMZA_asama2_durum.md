@@ -88,7 +88,25 @@ Sandbox'ta birbirinden uzak 7 senaryo aynı anda, ardından alan + duvar senaryo
 | Alana dön: alan dışındaki bot Alana dön durumuna geçti | Geçti |
 | A*: önündeki duvarın etrafından dolaşıp alana girdi | Geçti |
 
-Test edilemeyenler: gerçek çalılık ve harita (Okan'ın servisleri henüz stub), takılma kurtarma, kaçarken vurma, 3 botun karede 1 ms bütçesi (Profiler, Aşama 3).
+### Gerçek haritada maç testi (Okan'ın #7 ve #8'i ile, `Match.unity` kaydedilmeden)
+
+Geçici bir gözlemciyle (commit'lenmedi) 3 bot birbirine karşı 6 tam maç oynadı (oyuncu botlara görünmez ve ölümsüz yapıldı, maç 3× hızda). Gözlemler:
+
+- Botlar yaprak topluyor, profillerine göre tarif üretiyor (ör. Saldırgan: Hız 2, Güç 2, Sağlık 2, Güç 3 … Güç 4), canı azalınca iksir içiyor, kaçıyor ve iyileşip savaşa dönüyor.
+- KT-13: alan dışında en uzun kalma **2,2 sn** (< 3 sn). Editörde ortalama kare süresi **0,9 ms** (bütün oyun).
+- **Bulunan ve düzeltilen 2 hata:**
+  1. Alan daralırken bot alan dışına düşmüş bir yaprağa yöneliyor, sonra Alana dön ile geri çekiliyor, iki hedef arasında gidip gelip "takılıyordu". Artık Topla hedefi (yaprak ve ağaç) alan içinde ve önümüzdeki 10 sn içeride kalacak olmalı.
+  2. Alana dön'ün hedefi alanın merkezi, yani ulu ağacın gövdesi; yol gövdenin içinde bitiyordu. Artık hedefe karakter sığmıyorsa yol en yakın açık hücrede bitiyor ve bot varınca duruyor.
+  - Sonuç: düzeltmeden önce maç başına 9–15 takılma uyarısı, sonra **son iki maçta 0**.
+
+Ekiple konuşulması gerekenler (kod hatası değil):
+
+- **Ağaç kesme seyrek:** BOT-07'ye göre bot ancak görünen yaprak yokken ağaç keser; ortada sürekli yaprak olduğu için 6 maçta toplam 0–2 ağaç kesildi. KT-13 "her bot en az 1 ağaç keser" bu hâliyle zor geçer (SRS/denge konusu).
+- **Kaçan bot köşede ölüyor:** Çalılık servisi (VisibilityService) henüz boş olduğu için kaçacak çalılık yok; kaçan bot haritanın köşesine sıkışıp ölüyor. Okan'ın çalılıkları gelince değişir.
+- **Seviye 5 görülmedi:** 5 dakikada botlar en fazla 4. seviyeye çıktı; bu yüzden botlar maçta yetenek kullanmadı (Aşama 3 denge turu).
+- **Maç sonu:** Son saniyelerde alan, ulu ağaç gövdesinden (40 px + karakter 20 px) küçülüyor; içeride kalmak imkânsız. SRS'teki ani ölüm tasarımıyla tutarlı.
+
+Test edilemeyenler: gerçek çalılıklar (Okan'ın VisibilityService'i stub), kaçarken vurma.
 
 ## Kararlar (inceleme için)
 

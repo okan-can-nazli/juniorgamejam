@@ -73,7 +73,11 @@ namespace LeafBrawl.Bots
 
             CurrentWaypoint = target;
             Vector2 toTarget = target - pos;
-            return toTarget.sqrMagnitude > 0.0001f ? toTarget.normalized : Vector2.zero;
+            // Son noktaya yarım hücreden yakınsa varılmış sayılır (yerinde titreyip takılma sanılmasın).
+            bool last = !_hasPath || _index >= _path.Count - 1;
+            float arrive = grid.CellSize * 0.5f;
+            if (last && toTarget.sqrMagnitude < arrive * arrive) return Vector2.zero;
+            return toTarget.normalized;
         }
 
         /// <summary>
