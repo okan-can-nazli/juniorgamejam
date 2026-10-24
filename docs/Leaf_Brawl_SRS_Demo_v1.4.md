@@ -169,8 +169,8 @@ Bir geliştirmenin bir sonraki seviyesi için gereken yaprak sayısı seviye yü
 | --- | --- | --- | --- |
 | 1 → 2 | 3 K + 1 S + 1 Y | 3 S + 1 K + 1 Y | 3 Y + 1 K + 1 S |
 | 2 → 3 | 8 K + 4 S + 4 Y | 8 S + 4 K + 4 Y | 8 Y + 4 K + 4 S |
-| 3 → 4 | 15 K + 8 S + 8 Y | 15 S + 8 K + 8 Y | 15 Y + 8 K + 8 S |
-| 4 → 5 | 25 K + 15 S + 15 Y | 25 S + 15 K + 15 Y | 25 Y + 15 K + 15 S |
+| 3 → 4 | 10 K + 6 S + 6 Y | 10 S + 6 K + 6 Y | 10 Y + 6 K + 6 S |
+| 4 → 5 | 18 K + 10 S + 10 Y | 18 S + 10 K + 10 Y | 18 Y + 10 K + 10 S |
 
 | Tarif | Gereken yapraklar | Sonuç |
 | --- | --- | --- |
@@ -619,6 +619,7 @@ v1.1.1 (Okan, PR #14) ve v1.2 (PR #5) aynı gün iki ayrı dosya olarak yayımla
 | Bot tarifi | Bot tarifi yalnızca Topla ve Kaç durumlarında başlatır; Saldır'da hedefe yürürken durmaz | H (PR #12) | BOT-10 |
 | Bot toplama hedefi | Topla hedefi alanın içinde olmalı ve 10 sn içinde dışarıda kalmamalı | H (PR #12) | BOT-07 |
 | Envanter paneli | Oyuncu elendiğinde veya maç bittiğinde panel kendiliğinden kapanır; sonuç ekranının üstünde kalmaz | Y | FR-40, FR-07 |
+| Tarif maliyeti (denge) | 3 → 4 ve 4 → 5 maliyetleri ~%30 düştü (15/8/8 → 10/6/6, 25/15/15 → 18/10/10): testlerde 5 dakikada kimse 5. seviyeye çıkamıyor, yetenekler görülmüyordu (11.4 madde 3) | Y | 3.7 |
 
 ### 11.4 Açık sorular (ekip kararı bekliyor)
 
@@ -626,4 +627,4 @@ Aşağıdakiler gereksinim değildir; Aşama 3 denge turunda konuşulup gerekirs
 
 1. **KT-13 ve ağaç kesme:** BOT-07'ye göre bot ancak görünen yaprak yokken ağaç keser. Haritada çoğu zaman yaprak olduğu için testlerde 6 maçta toplam 0–2 ağaç kesildi; KT-13'teki "her bot en az 1 ağaç keser" ölçütü bu hâliyle zor geçer.
 2. **Aynı anda iki ulti:** İki karakter aynı karede ulti başlatırsa önce patlayan diğerini öldürür, ölenin ultisi patlamaz. Hangisinin önce patlayacağı belirli (her seferinde aynı) ama SRS bu durumu tanımlamıyor.
-3. **5. seviye:** Testlerde botlar 5 dakikalık maçta en fazla 4. seviyeye çıktı; yetenekler maçta neredeyse hiç görülmüyor. Tarif maliyetleri ve yaprak üretimi denge turunda yeniden değerlendirilecek.
+3. **5. seviye:** Testlerde botlar 5 dakikalık maçta en fazla 4. seviyeye çıktı. İlk adım olarak 3 → 4 ve 4 → 5 maliyetleri düşürüldü (11.3); yetmezse yaprak üretimi denge turunda değerlendirilecek.
