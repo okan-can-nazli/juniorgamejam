@@ -12,7 +12,8 @@ namespace LeafBrawl.World
     /// - Alan dışında kalan ağaç üretmez (FR-73); kesilen ağaç üretmez.
     /// - Ağaç devrilince (TreeFelled) 6-10 yaprak saçılır; bunlar sınıra sayılmaz.
     /// - Düşme noktası IsBlocked ise yeniden seçilir (en fazla maxDropTries).
-    /// Bütün rastgelelik Services.Rng'den.
+    /// Maç başı çekilişler Services.Rng'den. Maç boyunca iki ayrı akış: _growRng (kendiliğinden üretim), _felledRng (devrilen ağaç).
+    /// Akışların tohumu Start'ta Services.Rng'den bir kez çekilir (NFR-07); botların takılması gibi zamanlamaya bağlı olaylar akışı kaydırmaz.
     /// </summary>
     public class LeafSpawner : MonoBehaviour
     {
@@ -27,6 +28,8 @@ namespace LeafBrawl.World
         readonly List<Source> _sources = new List<Source>();
         readonly List<Leaf> _capped = new List<Leaf>();   // 80 sınırına sayılan yapraklar
         Transform _leaves;
+        Rng _growRng;     // ağaçların kendiliğinden yaprak üretimi
+        Rng _felledRng;   // devrilen ağacın saçtığı yapraklar
 
         void OnEnable() => GameEvents.TreeFelled += OnTreeFelled;
         void OnDisable() => GameEvents.TreeFelled -= OnTreeFelled;
@@ -35,6 +38,10 @@ namespace LeafBrawl.World
         {
             _leaves = new GameObject("Yapraklar").transform;
             _leaves.SetParent(transform, false);
+
+            // Sıra sabit: önce iki tohum, sonra kurulum çekilişleri.
+            _growRng = new Rng(Services.Rng.Range(1, int.MaxValue));
+            _felledRng = new Rng(Services.Rng.Range(1, int.MaxValue));
 
             BuildSources();
             DropStartLeaves();
@@ -55,7 +62,7 @@ namespace LeafBrawl.World
                 if (!Services.Zone.IsInside(s.Tree.Position)) continue;              // FR-73
                 if (CappedCount() >= Services.Config.leaves.maxOnMap) continue;      // sınır doluyken üretim yok
 
-                Drop(s.Tree.Position, Roll(s.OrangeChance), true, true);
+                Drop(s.Tree.Position, Roll(s.OrangeChance, _growRng), true, true, _growRng);
             }
         }
 
@@ -101,8 +108,8 @@ namespace LeafBrawl.World
             {
                 for (int i = 0; i < leaves.startAtGreatTree; i++)
                 {
-                    LeafType type = i < leaves.startAtGreatTreeOrange ? LeafType.Orange : RollRyg();
-                    Drop(great.Position, type, true, false);
+                    LeafType type = i < leaves.startAtGreatTreeOrange ? LeafType.Orange : RollRyg(Services.Rng);
+                    Drop(great.Position, type, true, false, Services.Rng);
                 }
             }
 
@@ -120,7 +127,7 @@ namespace LeafBrawl.World
                 for (int i = 0; i < leaves.startPerCluster; i++)
                 {
                     ChoppableTree tree = Services.Rng.Pick(cluster);
-                    Drop(tree.Position, Roll(trees.clusterOrangeChance), true, false);
+                    Drop(tree.Position, Roll(trees.clusterOrangeChance, Services.Rng), true, false, Services.Rng);
                 }
             }
         }
@@ -131,21 +138,21 @@ namespace LeafBrawl.World
         void OnTreeFelled(ITree tree, Character by)
         {
             var trees = Services.Config.trees;
-            int count = Services.Rng.Range(trees.felledLeavesMin, trees.felledLeavesMax + 1);
+            int count = _felledRng.Range(trees.felledLeavesMin, trees.felledLeavesMax + 1);
             for (int i = 0; i < count; i++)
-                Drop(tree.Position, Roll(trees.felledOrangeChance), false, true);
+                Drop(tree.Position, Roll(trees.felledOrangeChance, _felledRng), false, true, _felledRng);
         }
 
         // center'ın dropRadiusPx çevresinde geçerli bir nokta bulup yaprak koyar (FR-34).
         // Boşluk yarıçapı karakter yarıçapı kadardır: karakterin durabileceği bir nokta olsun, yaprak gövdeye gömülmesin.
-        void Drop(Vector2 center, LeafType type, bool countsToCap, bool falling)
+        void Drop(Vector2 center, LeafType type, bool countsToCap, bool falling, Rng rng)
         {
             float radius = Units.ToUnits(Services.Config.trees.dropRadiusPx);
             float clearPx = Services.Config.character.radiusPx;
 
             for (int i = 0; i < Services.Config.leaves.maxDropTries; i++)
             {
-                Vector2 pos = center + Services.Rng.InsideCircle(radius);
+                Vector2 pos = center + rng.InsideCircle(radius);
                 if (Services.World.IsBlocked(pos, clearPx)) continue;
 
                 Leaf leaf = Leaf.Create(_leaves, pos, type, falling);
@@ -161,9 +168,9 @@ namespace LeafBrawl.World
             return _capped.Count;
         }
 
-        static LeafType Roll(float orangeChance) => Services.Rng.Chance(orangeChance) ? LeafType.Orange : RollRyg();
+        static LeafType Roll(float orangeChance, Rng rng) => rng.Chance(orangeChance) ? LeafType.Orange : RollRyg(rng);
 
         // K, S, Y eşit olasılıkla (enum sırası: Red, Yellow, Green, Orange).
-        static LeafType RollRyg() => (LeafType)Services.Rng.Range(0, 3);
+        static LeafType RollRyg(Rng rng) => (LeafType)rng.Range(0, 3);
     }
 }

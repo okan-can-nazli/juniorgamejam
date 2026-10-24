@@ -13,7 +13,7 @@ Oyuncunun içinde dolaştığı her şey senin: hangi ağaçtan ne zaman yaprak 
 
 ### Tek doğru kaynak
 
-- Oyunun ne yapacağını **SRS v1.2** söyler: [`docs/Leaf_Brawl_SRS_Demo_v1.2.md`](../Leaf_Brawl_SRS_Demo_v1.2.md). Bu dosyalar yalnızca **işi kimin, nerede, hangi sırayla** yapacağını söyler.
+- Oyunun ne yapacağını **SRS v1.4** söyler: [`docs/Leaf_Brawl_SRS_Demo_v1.4.md`](../Leaf_Brawl_SRS_Demo_v1.4.md). Bu dosyalar yalnızca **işi kimin, nerede, hangi sırayla** yapacağını söyler.
 - Her görevin yanında SRS madde numarası (FR-xx, BOT-xx, UI-xx, KT-xx) yazar. PR açıklamasına bu numaraları yaz.
 - Oyundaki **hiçbir sayı koda yazılmaz.** Bütün değerler `Assets/StreamingAssets/balance.json` dosyasından `Services.Config` ile okunur (NFR-05). Uzunluklar dosyada **dünya px** olarak durur; kodda `Units.ToUnits(px)` ile çevrilir (40 px = 1 Unity birimi).
 
@@ -203,7 +203,7 @@ public interface IWorld {
 | `LeafSpawned` | `Vector2 konum, LeafType` | Okan |
 | `LootDropped` | `Vector2 konum, int toplam` | Okan |
 | `ZonePhaseChanged` | `int aşama` | Okan |
-| `ZoneWarning` | `float sonrakiYarıçapPx` (10 sn kala) | Okan |
+| `ZoneWarning` | `float sonrakiYarıçapPx`. **v1.4'ten beri yayınlanmaz** (alan uyarısı kalktı, SRS 3.8); ad sözleşmede kalır | Okan |
 | `RevealChanged` | `Character, bool` | Okan |
 
 **Unity katmanları** (M0'da Yiğit ayarlar): `Character`, `Obstacle` (gövde, kaya, harita sınırı), `Bush`, `Pickup`, `Tree`.
@@ -282,7 +282,7 @@ Bir iş, aşağıdakilerin hepsi doğruysa bitmiştir:
 | [ ] Engeller: ağaç gövdeleri `CircleCollider2D` (küme ve koru 18 px, ulu ağaç 40 px) ve `Obstacle` katmanında. Hasar alabilmesi için gövdede ayrıca `Tree` katmanında bir collider bulunsun. Kayalar 60×60 px `BoxCollider2D`, `Obstacle` katmanında | FR-12 |
 | [ ] `WorldService : IWorld`: `Awake`'te `Services.World = this`. `PickupsNear`, `TreesNear` (yalnızca kesilmemiş ağaçlar), `GreatTree`, `SpawnPoints`, `IsBlocked` (`Physics2D.OverlapCircle` + harita sınırı) | — |
 | [ ] `Leaf` (prefab, `IPickup`): türü, yere düşerken en fazla 0,6 sn süzülme (bu sırada toplanamaz), 45 sn ömür, son 5 sn yanıp sönme. Her karede canlı karakterlerden 32 px yakında olan varsa `character.Inventory.TryAdd(tür, 1)` çağır; 1 dönerse yaprak yok olur, 0 dönerse (envanter dolu) yerde kalır | FR-31–FR-33 |
-| [ ] `LeafSpawner`: her ağacın kendi sayacı (ulu ağaç 5 sn, küme ağacı 45 sn, koru ağacı 60 sn), turuncu olasılığı ağaç türüne göre; değilse K, S, Y eşit. Yaprak gövdenin 120 px çevresine düşer; nokta `IsBlocked` ise yeniden seç (en fazla 20 deneme). Haritada en fazla 80 yaprak; sınır doluyken üretim olmaz. Maç başında her kümenin yanında 3, ulu ağacın yanında 2 yaprak (biri turuncu). Her yaprakta `LeafSpawned` yayınla. Bütün rastgelelik `Services.Rng` ile | 3.5, FR-30, FR-34 |
+| [ ] `LeafSpawner`: her ağacın kendi sayacı (ulu ağaç 5 sn, küme ağacı 45 sn, koru ağacı 60 sn), turuncu olasılığı ağaç türüne göre; değilse K, S, Y eşit. Yaprak gövdenin 120 px çevresine düşer; nokta `IsBlocked` ise yeniden seç (en fazla 20 deneme). Haritada en fazla 80 yaprak; sınır doluyken üretim olmaz. Maç başında her kümenin yanında 3, ulu ağacın yanında 2 yaprak (biri turuncu). Her yaprakta `LeafSpawned` yayınla. Maç başı çekilişler `Services.Rng` ile; maç boyunca kendiliğinden üretim ve devrilen ağaç için ayrı `Rng` akışları (tohumları `Start`'ta `Services.Rng`'den bir kez çekilir, NFR-07) | 3.5, FR-30, FR-34 |
 | [ ] `ChoppableTree : ITree`: can 400. `ApplyDamage` her vuruşta `TreeHit` yayınlar ve 2 sn can çubuğu gösterir. Can 0 olunca veya `IsUlti` ise `TreeFelled` yayınlanır; gövdenin 120 px çevresine 6–10 yaprak saçılır (her biri %10 turuncu, 80 sınırına sayılmaz). Ağaç **kütüğe** dönüşür: `Obstacle` ve `Tree` collider'ları kapanır, üretim durur | 3.5, FR-35–FR-37 |
 | [ ] `GreatTree : ITree`: `Choppable = false`. Vuruşta yalnızca `GreatTreeHit` yayınlar; can düşmez | FR-35 |
 | [ ] `SafeZone : ISafeZone`: `Awake`'te `Services.Zone = this`. Yarıçap `Services.Match.MatchTime`'a göre aşama tablosundan doğrusal hesaplanır (3.8). Her 0,5 sn'de alan dışındaki canlı karakterlere saniyelik hasarın yarısı kadar `ApplyDamage(IsZone = true)` uygulanır. 5:00'ten sonra ani ölüm, 50/sn. Aşama değişince `ZonePhaseChanged` yayınlanır | 3.8, FR-70, FR-72 |
@@ -302,7 +302,7 @@ Bir iş, aşağıdakilerin hepsi doğruysa bitmiştir:
 | [ ] Taç saydamlığı: ağaç tacının altında bir karakter varsa taç yarı saydam olsun | FR-54 |
 | [ ] Ölüm ganimeti (`LootSystem`): `Died` olayını dinle. Kurbanın envanterinden K, S, Y'nin %35'i (aşağı yuvarla) ve T'nin %60'ı (yukarı yuvarla). Toplam 0 değilse öldüğü noktada (geçersizse en yakın geçerli nokta) **tek** bir `LootPile` bırak ve `LootDropped` yayınla | 3.10, FR-81 |
 | [ ] `LootPile : IPickup` (`IsLoot = true`): toplam 1–10 ise 1, 11–20 ise 2, 21 ve üzeri ise 3 üst üste yaprak görünür. Karakter 32 px'e gelince her tür için `TryAdd` çağır; sığmayan adet yığında kalır, gösterim güncellenir. 45 sn sonra kaybolur; 80 sınırına sayılmaz | 3.10 |
-| [ ] Alan uyarısı: bir sonraki daralmaya 10 sn kala yeni sınır yerde kesikli çizgiyle görünsün ve `ZoneWarning` yayınlansın. `WillBeOutsideWithin(pos, sn)` botlar için doğru çalışsın | 3.8, BOT-04 |
+| [ ] `WillBeOutsideWithin(pos, sn)` botlar için doğru çalışsın. (Daralmadan önce yeni sınırın yerde gösterilmesi v1.4'te kalktı; `ZoneWarning` yayınlanmaz) | 3.8, BOT-04 |
 | [ ] Furkan'ın sprite'larını prefab'larına bağla: yaprak (4 tür), ağaç, kütük, ulu ağaç, çalılık, kaya, zemin karoları, ganimet (1/2/3), alan örtüsü. Sprite dosyalarına dokunmazsın; yalnızca kendi prefab'larında onları seçersin | — |
 | [ ] Debug: editörde (Gizmos) ağaç canları, yaprak düşme yarıçapı, çalılık sınırları, alan yarıçapı | — |
 
