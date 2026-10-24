@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 1554938086435817463}
   - component: {fileID: 8445613874123590531}
   - component: {fileID: 7629252184453491332}
+  - component: {fileID: 2323615373589669432}
+  - component: {fileID: 7691036089937997864}
   m_Layer: 0
   m_Name: Map
   m_TagString: Untagged
@@ -57,3 +59,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4346d6824a0c74cc38d9770c0e430bf3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LeafBrawl.World.VisibilityService
+--- !u!114 &2323615373589669432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8111138404426313496}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 193b169e044acad4ba8ca61a27edc021, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LeafBrawl.World.MapGenerator
+--- !u!114 &7691036089937997864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8111138404426313496}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e19588198ae7881fa8d437d7f03b299, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LeafBrawl.World.LeafSpawner
