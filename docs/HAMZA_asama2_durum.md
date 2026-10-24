@@ -53,10 +53,51 @@ Console'da hata yok. Test betiği geçiciydi; commit'lenmedi.
 
 **Atılma 160 yerine ~178 px gidiyor.** `CharacterMotor.FixedUpdate` atılma süresini `_dashTimeLeft -= Time.fixedDeltaTime` ile sayıyor. 0,15 sn / (1/60 sn) = 9 adım olmalı, ama kayan nokta yuvarlamasıyla 10. adım da atılıyor: 160 × 10/9 ≈ 178 px. Öneri: adım sayısını baştan hesaplamak (`Mathf.RoundToInt(süre / fixedDeltaTime)`) ya da son adımda kalan mesafe kadar ilerlemek. Issue olarak açılacak.
 
-## Kalan işler (Aşama 2 – Botlar)
+# Aşama 2 – Botlar (dal `hamza/botlar`)
 
-- [ ] 4 durumlu bot makinesi: Alana dön > Kaç > Saldır > Topla (BOT-03–BOT-07)
-- [ ] Bot tarif üretimi ve profiller (BOT-10, 5.1)
-- [ ] Bot yetenek kullanımı: kalkan, ulti, atılma (BOT-13, BOT-06)
-- [ ] Yol bulma ve takılma (BOT-11)
-- [ ] Debug: durum adı ve hedef çizgisi (F4)
+## Ne yapıldı
+
+Dosyalar (`Scripts/Bots/`): `BotBrain.cs` (durum makinesi), `BotPerception.cs` (algı), `BotNavigator.cs` (yol izleme, takılma), `NavGrid.cs` (ızgara + A*).
+
+- **Algı (BOT-02, BOT-03):** Her 0,2 sn'de bir; 650 px içindeki ve `Visibility.CanSee` true olan karakterler, 650 px içindeki yapraklar ve ağaçlar, alan durumu. Görünmeyen karakter hiçbir hesapta kullanılmaz.
+- **Durum makinesi (BOT-03–BOT-07):** Öncelik Alana dön > Kaç > Saldır > Topla.
+  - **Alana dön:** alan dışında veya 10 sn içinde dışarıda kalacaksa merkeze; alan dışındayken atılma açıksa kullanır.
+  - **Kaç:** can %35 altında ve 500 px içinde görünen rakip varsa en yakın çalılığa (yoksa rakipten 500 px uzağa); rakip 200 px'ten yakınsa atılır; rakip 60 px'teyse kaçarken ona vurur. Can %50'ye çıkınca veya rakip 500 px dışına çıkınca çıkar.
+  - **Saldır:** BOT-08 skoruyla hedef; yaklaşır, menzil ve yay içindeyken vurur (yeni hedefte 0,25 sn bekler); atılma açıksa hedef 160–300 px'teyken mesafeyi kapatır.
+  - **Topla:** yaprak/ganimet → alan içindeki kesilebilir ağaç (keser) → ulu ağaç.
+- **Tarif (BOT-10, 5.1):** Güvendeyken önce can iksiri (can %50 altı), değilse profil sırasındaki ilk üretilebilir geliştirme. Üretim sırasında yerinde durur.
+- **Yetenekler (BOT-13):** Kalkan: can %50 altı ve 100 px'te rakip. Ulti: 120 px'te en az bir rakip. Atılma: Saldır, Kaç ve Alana dön'deki kurallarla.
+- **Yol bulma (BOT-11):** 20 px'lik ızgara (`World.IsBlocked` ile), 8 yönlü A*, köşe kesmez, yol düz çizgiyle kısaltılır. Hedef düz görünüyorsa A* çalışmaz. Karede en fazla 1 bot yol hesaplar; bir bot en sık 0,2 sn'de bir yol yeniler. `TreeFelled` olayında kesilen ağacın çevresi yeniden değerlendirilir. Dünya değişirse (yeni sahne, yeni harita) ızgara yeniden kurulur.
+- **Takılma (BOT-11):** 2 sn'de 20 px'ten az ilerleyen bot 200 px içinde rastgele (`Services.Rng`) açık bir noktaya yönelir.
+- **Debug:** Editörde F4 ile Scene görünümünde her botun durumu (renkli çizgi, etiket) ve sıradaki yol noktası.
+- Zone, Visibility ve World yalnızca `Services` üzerinden kullanılır; stub'larla da çalışır, Okan'ın gerçek servisleri gelince değişiklik gerekmez.
+
+## Test (Unity, Play mode, geçici test betiği – commit'lenmedi)
+
+Sandbox'ta birbirinden uzak 7 senaryo aynı anda, ardından alan + duvar senaryosu. **11/11 geçti:**
+
+| Test | Sonuç |
+| --- | --- |
+| Ulti: 120 px içindeki rakip öldü | Geçti |
+| Kalkan: can %44, 80 px'te rakip → kalkan açıldı | Geçti |
+| Atılma: hedef 240 px'te → atıldı | Geçti |
+| Kaç: can %30, rakip yakın → Kaç durumu; 500 px uzaklaştı | Geçti |
+| Görüş: çalılıkta gizli (görünmeyen) rakibe saldırmadı | Geçti |
+| Saldır: hedefe yürüdü, 10 vuruşta öldürdü, eleme bota yazıldı | Geçti |
+| Tarif: önce can iksiri (40 → 80), sonra Güç 1 → 2 | Geçti |
+| Alana dön: alan dışındaki bot Alana dön durumuna geçti | Geçti |
+| A*: önündeki duvarın etrafından dolaşıp alana girdi | Geçti |
+
+Test edilemeyenler: gerçek çalılık ve harita (Okan'ın servisleri henüz stub), takılma kurtarma, kaçarken vurma, 3 botun karede 1 ms bütçesi (Profiler, Aşama 3).
+
+## Kararlar (inceleme için)
+
+1. **Tarif yalnızca Topla ve Kaç durumunda** denenir; Saldır'da hedefe yürürken 1,5 sn durmasın diye. Alana dön'de bot zaten güvende değildir.
+2. **Profili olmayan bot** (sandbox'a elle konan) Saldırgan önceliğini kullanır. Maçta `MatchManager` profili verir.
+3. **Çalılık yoksa** (stub) kaçan bot rakipten 500 px uzaktaki noktaya gider.
+4. **Yol yenileme** en sık `decisionIntervalSec`'te bir; hedef bir hücreden az kıpırdadıysa yenilenmez.
+
+## Kalan işler
+
+- [ ] Okan'ın `WorldService`, `SafeZone`, `VisibilityService`'i gelince gerçek haritada deneme (KT-13)
+- [ ] Aşama 3: KT-13 (3 bot × 5 maç), KT-17, NFR-06, bot performansı, denge turu
