@@ -32,3 +32,38 @@ Sonbahar temalı, üstten görünümlü 2D eleme arena oyunu (Unity 6000.6.7f1, 
 | `Assets/StreamingAssets/debug.json` | Test ayarları: tohum, bot sayısı, başlangıç envanteri ve seviyeleri, timeScale. Kişisel değişiklik için yanına `debug.local.json` koy (commit'lenmez) |
 
 Main'e doğrudan push yok: her iş `isim/konu` dalında yapılır ve PR ile birleşir (ayrıntılar görev dosyalarındaki "Herkes için ortak kurallar" bölümünde).
+
+## Oyunu çalıştırma
+
+- **Tam maç:** `Assets/_Game/Scenes/Match.unity` → Play. 3 sn geri sayım, sonra oyuncu + 3 bot. Esc duraklatır.
+- **Ana menüden:** `Assets/_Game/Scenes/MainMenu.unity` → Play → Başla.
+- **Debug kısayolları (yalnızca editör):** F2 envantere 10'ar yaprak, F3 bütün seviyeler +1, F4 bot durumları (Scene görünümü).
+- **Unity arka plandayken Play ilerlemez.** Tuşlar yalnızca Unity öndeyken ve Game görünümüne tıklanmışken çalışır.
+
+## Test ayarları (`debug.local.json`)
+
+`Assets/StreamingAssets/debug.local.json` dosyası kişiseldir, commit'lenmez. Yalnızca yazdığın alanlar `debug.json`'u ezer:
+
+```json
+{ "seed": 12345, "showOverlay": true, "botCount": 1, "timeScale": 2 }
+```
+
+- `seed`: sabit tohum; aynı harita ve aynı yaprak üretimi (NFR-07).
+- `showOverlay`: FPS sayacı; FPS ve sahne açılış süreleri log'a da yazılır (KT-14, NFR-03).
+- **Yapı almadan önce bu dosyayı sil**, yoksa yapının içine kopyalanır.
+
+## Yapı alma (Windows ve macOS)
+
+- File → Build Profiles → Windows veya macOS → Build. Çıktıyı `Builds/` altına al (git'e girmez).
+- Sahne sırası: `MainMenu` (0), `Match` (1).
+- Yapı sonrası Unity `Assets/_Game/Settings/PC_RPAsset.asset` ve `UniversalRenderPipelineGlobalSettings.asset`'i yeniden yazar (URP shader verisi). **Bunları commit'leme:** `git checkout -- Assets/_Game/Settings`.
+- Yapıdaki `*_BackUpThisFolder_ButDontShipItWithYourGame` klasörünü dağıtma.
+
+## Sık yapılan hatalar
+
+- **`.meta` dosyası:** Unity'ye eklenen her dosyanın `.meta`'sı da commit'lenmeli; yoksa herkeste farklı GUID oluşur ve prefab bağlantıları kopar. Dosyaları GitHub web'den değil Unity'den ekle; taşırken Unity'nin Project penceresini kullan.
+- **Görseller:** `Assets/_Game/Art/Sprites/<Klasör>/` altına. İçe aktarma: PPU 16, Point, Compression None; karakterde pivot ayak ortası. main'e girmiş bir dosyanın adını veya yerini değiştirme.
+- **Script adı:** Dosya adı = sınıf adı (`MainMenuView.cs` → `class MainMenuView`); yoksa Unity bileşeni sahneye ekleyemez.
+- **Satır sonları (Windows):** `git config core.autocrlf true`. Yoksa dosyalar herkeste sürekli "değişmiş" görünür.
+- **`Match.unity`'yi yalnızca Yiğit kaydeder;** diğerleri Play'de dener, kaydetmez. Herkesin kendi `Sandbox_<İsim>.unity` sahnesi var.
+- **Sayılar koda yazılmaz:** bütün oyun değerleri `balance.json`'da (uzunluklar dünya px, 40 px = 1 Unity birimi).
