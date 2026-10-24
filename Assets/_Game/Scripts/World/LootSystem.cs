@@ -15,6 +15,7 @@ namespace LeafBrawl.World
         const float RoundGuard = 0.0001f;
 
         Transform _piles;
+        Rng _rng;   // ganimet noktası akışı: ölüm zamanlaması Services.Rng'yi kaydırmasın (NFR-07)
 
         void OnEnable() => GameEvents.Died += OnDied;
         void OnDisable() => GameEvents.Died -= OnDied;
@@ -23,6 +24,9 @@ namespace LeafBrawl.World
         {
             _piles = new GameObject("Ganimetler").transform;
             _piles.SetParent(transform, false);
+
+            // Tohumdan türetilir, Services.Rng'den çekiliş yapmaz: Start sırasından bağımsız, aynı tohum aynı akış.
+            _rng = new Rng(unchecked(Services.Rng.Seed + 1));
         }
 
         void OnDied(Character victim, Character killer)
@@ -50,14 +54,14 @@ namespace LeafBrawl.World
 
         // Öldüğü nokta geçerliyse orası; değilse çevresinde geçerli bir nokta (FR-34).
         // Arama yarıçapı her denemede karakter yarıçapı kadar büyür.
-        static Vector2 FindDropPoint(Vector2 position)
+        Vector2 FindDropPoint(Vector2 position)
         {
             float clearPx = Services.Config.character.radiusPx;
             if (!Services.World.IsBlocked(position, clearPx)) return position;
 
             for (int i = 1; i <= Services.Config.leaves.maxDropTries; i++)
             {
-                Vector2 candidate = position + Services.Rng.InsideCircle(Units.ToUnits(clearPx * i));
+                Vector2 candidate = position + _rng.InsideCircle(Units.ToUnits(clearPx * i));
                 if (!Services.World.IsBlocked(candidate, clearPx)) return candidate;
             }
             return position;
