@@ -8,7 +8,7 @@ Bir test kalırsa sahibine `[Sahip] KT-xx ...` başlıklı issue açılır ve ba
 | KT-01 | Başla, 3 sn geri sayım, 4 karakter farklı doğma noktasında, saat 0:00 | Yiğit | 24.10.2026 | Geçti | Geri sayım hatası #39'da düzeltildi (önce ~2,3–2,8 sn sürüyordu) |
 | KT-02 | 30 sn hareket: 8 yön, 220 px/sn, gövde ve kayadan geçmez, çalılık ve kütükten geçer | Okan | 24.10.2026 | Geçti | Sandbox_Okan'da elle denendi; ölçüm değerleri kaydedilmedi |
 | KT-03 | Bota 10 vuruş: 10. isabette ölür, tek ganimet yığını | Hamza | | Denenmedi | |
-| KT-04 | Ulu ağaçta 60 sn yaprak topla: otomatik toplama, HUD adetleri, sınırdaki tür toplanmaz | Okan | | Denenmedi | |
+| KT-04 | Ulu ağaçta 60 sn yaprak topla: otomatik toplama, HUD adetleri, sınırdaki tür toplanmaz | Okan | 24.10.2026 | Geçti (mantık) | Sandbox_Okan'da WorldDebug satırlarıyla denendi; HUD adetleri Furkan #32 gelince yeniden denenecek; ölçüm değerleri kaydedilmedi |
 | KT-05 | 3 K + 1 S + 1 Y ile 1'e bas: Güç 1 → 2, hasar 13 | Yiğit | 24.10.2026 | Geçti (mantık) | Üretim çubuğu ve bildirim Furkan #32 gelince yeniden denenecek |
 | KT-06 | Yaprak yetmezken ve hasar alır almaz üretim denemesi: seviye değişmez, kırmızı uyarı | Yiğit | 24.10.2026 | Geçti (mantık) | Kırmızı işaret Furkan #32 / #33 gelince |
 | KT-07 | Tab paneli: 4 kart, vurgulu ve soluk durumlar, hareket var saldırı yok | Furkan | | Denenmedi | |
