@@ -28,6 +28,7 @@ namespace LeafBrawl.Core
         InputAction _pause;
         MatchState _stateBeforePause;
         float _countdownLeft;
+        float _countdownStartTime;   // geri sayımın başladığı Time.time
         int _lastTick;
         bool _endCheckPending;
 
@@ -89,6 +90,7 @@ namespace LeafBrawl.Core
                 if (c.IsPlayer) Player = c;
 
             _countdownLeft = Services.Config.match.countdownSec;
+            _countdownStartTime = Time.time;
             _lastTick = Mathf.CeilToInt(_countdownLeft);
             GameEvents.RaiseMatchStateChanged(MatchState.Countdown);
             GameEvents.RaiseCountdownTick(_lastTick);
@@ -137,7 +139,9 @@ namespace LeafBrawl.Core
         // FR-05: geri sayımda kimse hareket edemez (Character intent'i sıfırlar); maç saati sonra başlar.
         void TickCountdown()
         {
-            _countdownLeft -= Time.deltaTime;
+            // deltaTime toplanmaz: sahne yüklendikten sonraki karelerde Unity deltaTime'ı 0,33 verir ama Time.time ilerlemez;
+            // toplamak 3 sn'lik geri sayımı ~0,2 sn kısaltıyordu (FR-05). Duraklatmada Time.time durduğu için geri sayım da durur.
+            _countdownLeft = Services.Config.match.countdownSec - (Time.time - _countdownStartTime);
             int tick = Mathf.Max(0, Mathf.CeilToInt(_countdownLeft));
             if (tick != _lastTick)
             {
