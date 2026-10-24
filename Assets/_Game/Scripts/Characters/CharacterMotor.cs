@@ -13,18 +13,19 @@ namespace LeafBrawl.Characters
         Rigidbody2D _body;
         Character _character;
         Vector2 _dashVelocity;
-        float _dashTimeLeft;
+        int _dashStepsLeft;
 
         /// <summary>Birim/sn.</summary>
         public Vector2 Velocity => _body.linearVelocity;
-        public bool IsDashing => _dashTimeLeft > 0f;
+        public bool IsDashing => _dashStepsLeft > 0;
 
         /// <summary>Engellere çarparak kısa itme (Hamza'nın atılması çağırır, SRS 3.4).</summary>
         public void Dash(Vector2 direction, float distancePx, float duration)
         {
             if (direction.sqrMagnitude < 0.0001f || duration <= 0f || !_character.IsAlive) return;
-            _dashVelocity = direction.normalized * (Units.ToUnits(distancePx) / duration);
-            _dashTimeLeft = duration;
+            // Süre fizik adımı olarak baştan sayılır: kayan noktayla süre saymak fazladan bir adım attırıyordu (~178 px).
+            _dashStepsLeft = Mathf.Max(1, Mathf.RoundToInt(duration / Time.fixedDeltaTime));
+            _dashVelocity = direction.normalized * (Units.ToUnits(distancePx) / (_dashStepsLeft * Time.fixedDeltaTime));
         }
 
         void Awake()
@@ -37,13 +38,13 @@ namespace LeafBrawl.Characters
         {
             if (!_character.IsAlive)
             {
-                _dashTimeLeft = 0f;
+                _dashStepsLeft = 0;
                 return;
             }
             if (IsDashing)
             {
                 _body.linearVelocity = _dashVelocity;
-                _dashTimeLeft -= Time.fixedDeltaTime;
+                _dashStepsLeft--;
                 return;
             }
             Vector2 move = _character.CurrentIntent.Move;
