@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3394752452908599352}
   - component: {fileID: 882488954582889793}
   - component: {fileID: 2009639497465914933}
+  - component: {fileID: 89027376317715709}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -58,3 +59,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LeafBrawl.Core.MatchManager
   actions: {fileID: -944628639613478452, guid: a49acbbe0bd854667b1f3817d3244c62, type: 3}
+  spawnCharacters: 0
+  playerPrefab: {fileID: 2739545617655588953, guid: ab0c388eb3d1341f5b446a973bbc1c31, type: 3}
+  botPrefab: {fileID: 1715445156856066088, guid: 06f56d246bf244847934483959e9f4a3, type: 3}
+--- !u!114 &89027376317715709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825827527010204259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62c53e4fa632e419c8004066d57e9533, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LeafBrawl.Core.DebugHotkeys

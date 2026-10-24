@@ -12,6 +12,7 @@ namespace LeafBrawl.Characters
     {
         [SerializeField] InputActionAsset actions;
 
+        InputActionAsset _actions;   // bileşene ait kopya; paylaşılan asset'in durumu sahneler arasında karışmaz
         InputActionMap _map;
         InputAction _move, _aim, _swing, _dash, _shield, _ulti, _inventory;
         readonly InputAction[] _craft = new InputAction[4];
@@ -53,7 +54,8 @@ namespace LeafBrawl.Characters
         void Awake()
         {
             _character = GetComponent<Character>();
-            _map = actions.FindActionMap("Player", true);
+            _actions = Instantiate(actions);
+            _map = _actions.FindActionMap("Player", true);
             _move = _map.FindAction("Move", true);
             _aim = _map.FindAction("Aim", true);
             _swing = _map.FindAction("Swing", true);
@@ -64,8 +66,9 @@ namespace LeafBrawl.Characters
             for (int i = 0; i < _craft.Length; i++) _craft[i] = _map.FindAction("Craft" + (i + 1), true);
         }
 
-        // Harita paylaşılan asset'te durur (MatchManager Esc'yi aynı haritadan okur), bu yüzden kapatılmaz.
+        // Ölünce de açık kalır (Tab vb.); nesneyle birlikte kopya da yok edilir.
         void OnEnable() => _map.Enable();
+        void OnDestroy() => Destroy(_actions);
 
         void Update()
         {
