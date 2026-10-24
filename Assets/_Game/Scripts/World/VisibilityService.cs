@@ -22,11 +22,24 @@ namespace LeafBrawl.World
         readonly List<Bush> _bushes = new List<Bush>();
         readonly Dictionary<Character, int> _bushOf = new Dictionary<Character, int>();   // karakter → çalılık sırası, yoksa -1
         MapGenerator _map;
+        readonly Dictionary<Character, float> _revealUntil = new Dictionary<Character, float>();   // görünürlüğün biteceği Time.time
 
         void Awake()
         {
             _map = GetComponent<MapGenerator>();
             Services.Visibility = this;
+        }
+
+        void OnEnable()
+        {
+            GameEvents.Swung += OnSwung;
+            GameEvents.Damaged += OnDamaged;
+        }
+
+        void OnDisable()
+        {
+            GameEvents.Swung -= OnSwung;
+            GameEvents.Damaged -= OnDamaged;
         }
 
         // MapGenerator Awake'te (-100) kurduğu için Layout burada hazır.
@@ -54,6 +67,12 @@ namespace LeafBrawl.World
                 int bush = c.IsAlive ? FindBush(c.Position) : -1;
                 _bushOf[c] = bush;
                 c.IsInBush = bush >= 0;
+
+                // FR-52: görünme süresi dolana kadar IsRevealed true. Değişince RevealChanged yayınlanır.
+                bool revealed = c.IsAlive && _revealUntil.TryGetValue(c, out float until) && Time.time < until;
+                if (revealed == c.IsRevealed) continue;
+                c.IsRevealed = revealed;
+                GameEvents.RaiseRevealChanged(c, revealed);
             }
 
             Character player = match.Player;
@@ -88,6 +107,18 @@ namespace LeafBrawl.World
                 best = bush.Center;
             }
             return best;
+        }
+
+        // ---------------------------------------------------------------- görünme (FR-52)
+
+        void OnSwung(Character c) => Reveal(c);
+        void OnDamaged(Character victim, DamageInfo info) => Reveal(victim);
+
+        // Yalnızca çalılıktaki karakter görünür olur; süre her olayda yenilenir.
+        void Reveal(Character c)
+        {
+            if (!IsInBush(c)) return;
+            _revealUntil[c] = Time.time + Services.Config.bushes.revealSec;
         }
 
         // ---------------------------------------------------------------- yardımcı
