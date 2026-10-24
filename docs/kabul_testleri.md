@@ -13,7 +13,7 @@ Bir test kalırsa sahibine `[Sahip] KT-xx ...` başlıklı issue açılır ve ba
 | KT-06 | Yaprak yetmezken ve hasar alır almaz üretim denemesi: seviye değişmez, kırmızı uyarı | Yiğit | 24.10.2026 | Geçti (mantık) | Kırmızı işaret Furkan #32 / #33 gelince |
 | KT-07 | Tab paneli: 4 kart, vurgulu ve soluk durumlar, hareket var saldırı yok | Furkan | | Denenmedi | |
 | KT-08 | Debug ile Güç, Hız, Sağlık 5: yığın kademeleri, yetenekler açılır | Yiğit | 24.10.2026 | Geçti (mantık) | Yığın görseli ve "En üst seviye" Furkan #31 / #33 gelince |
-| KT-09 | Çalılıkta bot geçerken görünmezlik, savurunca 1 sn görünme | Okan | | Denenmedi | |
+| KT-09 | Çalılıkta bot geçerken görünmezlik, savurunca 1 sn görünme | Okan | 24.10.2026 | Geçti | Sandbox_Okan'da elle denendi (kendin ve bot); süreler kaydedilmedi |
 | KT-10 | 1:30'a kadar köşe korusunda bekle: daralma, 4 hasar/sn, koru ağaçları üretimi bırakır | Okan | 24.10.2026 | Geçti | Sandbox_Okan'da elle denendi; hasar başlangıcı ve ölüm anı kaydedilmedi |
 | KT-11 | Ölünceye kadar oyna: sonuç ekranı sıra, süre, eleme, tehdit | Yiğit | 24.10.2026 | Kısmen | Sonuç verisi doğru; ekran Furkan #34 gelince |
 | KT-12 | Saldırmadan hayatta kal: maç en geç 5:05'te biter | Okan (Yiğit'le) | 24.10.2026 | Geçti | Yiğit denedi: maç 5:00,33'te bitti, FR-83 sıralaması doğru |
