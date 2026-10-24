@@ -19,7 +19,7 @@ namespace LeafBrawl.Bots
 
         Character _self;
         readonly BotPerception _perception = new BotPerception();
-        readonly BotNavigator _navigator = new BotNavigator();
+        BotNavigator _navigator;
         float _nextDecisionTime;
 
         // Karar
@@ -39,7 +39,13 @@ namespace LeafBrawl.Bots
         /// <summary>Saldır'da hedef, Kaç'ta kaçılan rakip (debug ve görsel için).</summary>
         public Character Target => _target;
 
-        void Awake() => _self = GetComponent<Character>();
+        void Awake()
+        {
+            _self = GetComponent<Character>();
+            // NFR-07: botun kendi akışı; takılma kurtarması yaprak üretiminin akışını kaydırmasın (#17).
+            // Tohum maç başında, botlar sırayla doğarken çekilir; sıra sabit olduğu için akış da sabittir.
+            _navigator = new BotNavigator(new Rng(Services.Rng.Range(1, int.MaxValue)));
+        }
 
         public CharacterIntent ReadIntent(Character self)
         {
