@@ -146,7 +146,9 @@ namespace LeafBrawl.Presentation
         void OnCardClicked(RecipeId recipe)
         {
             var player = Services.Match.Player;
-            if (player != null && player.IsAlive) player.Crafting.Request(recipe);
+            if (player == null || !player.IsAlive) return;
+            AudioManager.PlayClick();
+            player.Crafting.Request(recipe);
         }
 
         // ---------------- Kurulum (640×360 sanat birimi) ----------------

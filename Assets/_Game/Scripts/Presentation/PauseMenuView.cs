@@ -20,15 +20,14 @@ namespace LeafBrawl.Presentation
         [SerializeField] Button soundButton;
         [SerializeField] TMP_Text soundLabel;
 
-        // Yer tutucu: ses AudioManager'a bağlanınca (Furkan, NFR-10) bu değer oradan okunur ve oraya yazılır.
-        bool _soundOn = true;
-
         void Awake()
         {
             if (resumeButton != null) resumeButton.onClick.AddListener(() => Services.Match.Resume());
             if (restartButton != null) restartButton.onClick.AddListener(SceneFlow.Restart);
             if (menuButton != null) menuButton.onClick.AddListener(SceneFlow.LoadMenu);
             if (soundButton != null) soundButton.onClick.AddListener(ToggleSound);
+            foreach (var button in new[] { resumeButton, restartButton, menuButton, soundButton })
+                if (button != null) button.onClick.AddListener(AudioManager.PlayClick);
             RefreshSoundLabel();
         }
 
@@ -41,15 +40,16 @@ namespace LeafBrawl.Presentation
             if (panel != null) panel.SetActive(state == MatchState.Paused);
         }
 
+        // NFR-10: ses aç/kapa AudioManager.Muted'ı değiştirir.
         void ToggleSound()
         {
-            _soundOn = !_soundOn;
+            AudioManager.Muted = !AudioManager.Muted;
             RefreshSoundLabel();
         }
 
         void RefreshSoundLabel()
         {
-            if (soundLabel != null) soundLabel.text = _soundOn ? "Ses: Açık" : "Ses: Kapalı";
+            if (soundLabel != null) soundLabel.text = AudioManager.Muted ? "Ses: Kapalı" : "Ses: Açık";
         }
     }
 }

@@ -27,6 +27,8 @@ namespace LeafBrawl.Presentation
         {
             if (restartButton != null) restartButton.onClick.AddListener(SceneFlow.Restart);
             if (menuButton != null) menuButton.onClick.AddListener(SceneFlow.LoadMenu);
+            foreach (var button in new[] { restartButton, menuButton })
+                if (button != null) button.onClick.AddListener(AudioManager.PlayClick);
         }
 
         void OnEnable() => GameEvents.MatchStateChanged += OnMatchState;

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db1e2619f71274a5e9e8ec6cbfa59483, type: 3}
+  m_Name: SfxLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::LeafBrawl.Presentation.SfxLibrary
+  swing: {fileID: 8300000, guid: c3d06de9706b24ee7a1ee44b5e4c64ee, type: 3}
+  hit: {fileID: 8300000, guid: bbf2a5665845647c087731c861abf339, type: 3}
+  death: {fileID: 8300000, guid: 4bdd77c9e6754446882c4a3c7bb9bef5, type: 3}
+  treeHit: {fileID: 8300000, guid: 0cfe8c9701ea24a639e143dfd89753dd, type: 3}
+  greatTreeHit: {fileID: 8300000, guid: d58440a1d39ca4042b2511ff8973ac66, type: 3}
+  treeFelled: {fileID: 8300000, guid: 7695ed7c6c8e341e5b591f0383914ee1, type: 3}
+  leafCollected: {fileID: 8300000, guid: 9cd1f7f1be853457a935fbd240ec567a, type: 3}
+  craftStarted: {fileID: 8300000, guid: 9370be4e580004455a998a1fee5bd055, type: 3}
+  craftCompleted: {fileID: 8300000, guid: 3d4659f203c854529bdac3d7be6e65fb, type: 3}
+  craftRejected: {fileID: 8300000, guid: 8b40b069163634abb8494d0350a85b29, type: 3}
+  abilityUnlocked: {fileID: 8300000, guid: fb3d40d23ac5545aea4f0b8748fae669, type: 3}
+  dash: {fileID: 8300000, guid: 8ca9cc84ccf85418aafcddb1aa00d846, type: 3}
+  shieldUp: {fileID: 8300000, guid: 388eb417a3aab426c906f9b69994904c, type: 3}
+  shieldBroken: {fileID: 8300000, guid: b0a75ba69bd5942bb9713f20c8749bb3, type: 3}
+  ultiWindup: {fileID: 8300000, guid: 8d2bb952dfed14a29aa4e7a736c811e3, type: 3}
+  ultiBlast: {fileID: 8300000, guid: fd592f050462f46d38ff9735c34d45e3, type: 3}
+  zoneShrink: {fileID: 8300000, guid: d8744f4681363405995e2efedf1fb1cc, type: 3}
+  countdownTick: {fileID: 8300000, guid: b1be47fc3020a47f8941418293395539, type: 3}
+  countdownGo: {fileID: 8300000, guid: 9f3c08f7b16cc409580de58f7c1a0e5a, type: 3}
+  uiClick: {fileID: 8300000, guid: 25f9d068f9ad744af9b142c1a3f4711d, type: 3}
+  volume: 0.8
+  leafSoundsPerSecond: 6
