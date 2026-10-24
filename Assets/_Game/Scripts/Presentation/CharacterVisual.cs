@@ -75,6 +75,10 @@ namespace LeafBrawl.Presentation
         int _pileCount;
         float _pileFrom, _pileTo, _pileGrowStart = float.NegativeInfinity;
 
+        /// <summary>Şu anki gövde karesi ve aynalama (VfxManager atılma izi için).</summary>
+        public Sprite BodySprite => _body != null ? _body.sprite : null;
+        public bool BodyFlipX => _body != null && _body.flipX;
+
         void Awake()
         {
             _character = GetComponentInParent<Character>();
