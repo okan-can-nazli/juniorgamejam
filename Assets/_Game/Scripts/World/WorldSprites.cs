@@ -13,6 +13,8 @@ namespace LeafBrawl.World
     public class WorldSprites
     {
         public Sprite border;           // harita sınırının dışı, döşenir
+        public Sprite grass;            // harita zemini, döşenir
+        public Sprite clearing;         // merkez açıklığın zemini, döşenir (daireyle kesilir)
         public Sprite[] trunks;         // küme ve koru ağacı gövdesi
         public Sprite[] canopies;       // küme ve koru ağacı tacı
         public Sprite stump;            // kesilmiş ağaç (kütük)
