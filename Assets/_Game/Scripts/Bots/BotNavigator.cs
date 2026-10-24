@@ -13,6 +13,8 @@ namespace LeafBrawl.Bots
     {
         static int _lastPathFrame = -1;
 
+        readonly Rng _rng;
+
         readonly List<Vector2> _path = new List<Vector2>();
         int _index;
         Vector2 _pathGoal;
@@ -28,6 +30,9 @@ namespace LeafBrawl.Bots
         /// <summary>Takılmadan kurtulmak için rastgele noktaya gidiliyor mu (debug için).</summary>
         public bool Unsticking => _unstuckGoal.HasValue;
         public Vector2? CurrentWaypoint { get; private set; }
+
+        /// <param name="rng">Botun kendi rastgelelik akışı (takılma kurtarma noktası için).</param>
+        public BotNavigator(Rng rng) => _rng = rng;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetOnPlay() => _lastPathFrame = -1;
@@ -101,7 +106,7 @@ namespace LeafBrawl.Bots
             if (!stuck || _unstuckGoal.HasValue) return;
 
             var grid = NavGrid.Get();
-            Vector2 random = pos + Services.Rng.InsideCircle(Units.ToUnits(bots.unstuckRadiusPx));
+            Vector2 random = pos + _rng.InsideCircle(Units.ToUnits(bots.unstuckRadiusPx));
             _unstuckGoal = grid.NearestOpen(random);
             _unstuckUntil = Time.time + bots.stuckCheckSec;
             _hasPath = false;
