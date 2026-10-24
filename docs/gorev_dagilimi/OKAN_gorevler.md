@@ -13,7 +13,7 @@ Oyuncunun içinde dolaştığı her şey senin: hangi ağaçtan ne zaman yaprak 
 
 ### Tek doğru kaynak
 
-- Oyunun ne yapacağını **SRS v1.1** söyler: [`docs/Leaf_Brawl_SRS_Demo_v1.1.md`](../Leaf_Brawl_SRS_Demo_v1.1.md). Bu dosyalar yalnızca **işi kimin, nerede, hangi sırayla** yapacağını söyler.
+- Oyunun ne yapacağını **SRS v1.2** söyler: [`docs/Leaf_Brawl_SRS_Demo_v1.2.md`](../Leaf_Brawl_SRS_Demo_v1.2.md). Bu dosyalar yalnızca **işi kimin, nerede, hangi sırayla** yapacağını söyler.
 - Her görevin yanında SRS madde numarası (FR-xx, BOT-xx, UI-xx, KT-xx) yazar. PR açıklamasına bu numaraları yaz.
 - Oyundaki **hiçbir sayı koda yazılmaz.** Bütün değerler `Assets/StreamingAssets/balance.json` dosyasından `Services.Config` ile okunur (NFR-05). Uzunluklar dosyada **dünya px** olarak durur; kodda `Units.ToUnits(px)` ile çevrilir (40 px = 1 Unity birimi).
 
