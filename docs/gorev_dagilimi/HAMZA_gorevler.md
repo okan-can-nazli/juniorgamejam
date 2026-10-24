@@ -13,7 +13,7 @@ Savaş ve botlar, oyunun "hissini" belirleyen kısım. Yiğit'in karakterine ve 
 
 ### Tek doğru kaynak
 
-- Oyunun ne yapacağını **SRS v1.2** söyler: [`docs/Leaf_Brawl_SRS_Demo_v1.2.md`](../Leaf_Brawl_SRS_Demo_v1.2.md). Bu dosyalar yalnızca **işi kimin, nerede, hangi sırayla** yapacağını söyler.
+- Oyunun ne yapacağını **SRS v1.4** söyler: [`docs/Leaf_Brawl_SRS_Demo_v1.4.md`](../Leaf_Brawl_SRS_Demo_v1.4.md). Bu dosyalar yalnızca **işi kimin, nerede, hangi sırayla** yapacağını söyler.
 - Her görevin yanında SRS madde numarası (FR-xx, BOT-xx, UI-xx, KT-xx) yazar. PR açıklamasına bu numaraları yaz.
 - Oyundaki **hiçbir sayı koda yazılmaz.** Bütün değerler `Assets/StreamingAssets/balance.json` dosyasından `Services.Config` ile okunur (NFR-05). Uzunluklar dosyada **dünya px** olarak durur; kodda `Units.ToUnits(px)` ile çevrilir (40 px = 1 Unity birimi).
 
@@ -203,7 +203,7 @@ public interface IWorld {
 | `LeafSpawned` | `Vector2 konum, LeafType` | Okan |
 | `LootDropped` | `Vector2 konum, int toplam` | Okan |
 | `ZonePhaseChanged` | `int aşama` | Okan |
-| `ZoneWarning` | `float sonrakiYarıçapPx` (10 sn kala) | Okan |
+| `ZoneWarning` | `float sonrakiYarıçapPx`. **v1.4'ten beri yayınlanmaz** (alan uyarısı kalktı, SRS 3.8); ad sözleşmede kalır | Okan |
 | `RevealChanged` | `Character, bool` | Okan |
 
 **Unity katmanları** (M0'da Yiğit ayarlar): `Character`, `Obstacle` (gövde, kaya, harita sınırı), `Bush`, `Pickup`, `Tree`.

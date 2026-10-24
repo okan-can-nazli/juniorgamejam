@@ -1,6 +1,6 @@
 # Leaf Brawl – Yazılım Gereksinimleri Spesifikasyonu (Demo v1.1)
 
-> **Bu sürüm eskidi.** Geçerli sürüm: [Demo v1.2](Leaf_Brawl_SRS_Demo_v1.2.md) (24 Ekim 2026, her maçta sapmalı harita).
+> **Bu sürüm eskidi.** Geçerli sürüm: [Demo v1.4](Leaf_Brawl_SRS_Demo_v1.4.md) (24 Ekim 2026; v1.1.1 ve v1.2'yi birleştirir, alınan kararları işler).
 
 23 Ekim 2026 · Yiğit Ahmet Hosta · v1.0'a gelen ekip geri bildirimleriyle güncellendi (değişiklikler Bölüm 11'de; 24 Ekim: harita çeşitliliği eklendi)
 

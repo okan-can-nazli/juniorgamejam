@@ -13,7 +13,7 @@ Oyuncunun içinde dolaştığı her şey senin: hangi ağaçtan ne zaman yaprak 
 
 ### Tek doğru kaynak
 
-- Oyunun ne yapacağını **SRS v1.2** söyler: [`docs/Leaf_Brawl_SRS_Demo_v1.2.md`](../Leaf_Brawl_SRS_Demo_v1.2.md). Bu dosyalar yalnızca **işi kimin, nerede, hangi sırayla** yapacağını söyler.
+- Oyunun ne yapacağını **SRS v1.4** söyler: [`docs/Leaf_Brawl_SRS_Demo_v1.4.md`](../Leaf_Brawl_SRS_Demo_v1.4.md). Bu dosyalar yalnızca **işi kimin, nerede, hangi sırayla** yapacağını söyler.
 - Her görevin yanında SRS madde numarası (FR-xx, BOT-xx, UI-xx, KT-xx) yazar. PR açıklamasına bu numaraları yaz.
 - Oyundaki **hiçbir sayı koda yazılmaz.** Bütün değerler `Assets/StreamingAssets/balance.json` dosyasından `Services.Config` ile okunur (NFR-05). Uzunluklar dosyada **dünya px** olarak durur; kodda `Units.ToUnits(px)` ile çevrilir (40 px = 1 Unity birimi).
 
@@ -203,7 +203,7 @@ public interface IWorld {
 | `LeafSpawned` | `Vector2 konum, LeafType` | Okan |
 | `LootDropped` | `Vector2 konum, int toplam` | Okan |
 | `ZonePhaseChanged` | `int aşama` | Okan |
-| `ZoneWarning` | `float sonrakiYarıçapPx` (10 sn kala) | Okan |
+| `ZoneWarning` | `float sonrakiYarıçapPx`. **v1.4'ten beri yayınlanmaz** (alan uyarısı kalktı, SRS 3.8); ad sözleşmede kalır | Okan |
 | `RevealChanged` | `Character, bool` | Okan |
 
 **Unity katmanları** (M0'da Yiğit ayarlar): `Character`, `Obstacle` (gövde, kaya, harita sınırı), `Bush`, `Pickup`, `Tree`.
@@ -302,7 +302,7 @@ Bir iş, aşağıdakilerin hepsi doğruysa bitmiştir:
 | [ ] Taç saydamlığı: ağaç tacının altında bir karakter varsa taç yarı saydam olsun | FR-54 |
 | [ ] Ölüm ganimeti (`LootSystem`): `Died` olayını dinle. Kurbanın envanterinden K, S, Y'nin %35'i (aşağı yuvarla) ve T'nin %60'ı (yukarı yuvarla). Toplam 0 değilse öldüğü noktada (geçersizse en yakın geçerli nokta) **tek** bir `LootPile` bırak ve `LootDropped` yayınla | 3.10, FR-81 |
 | [ ] `LootPile : IPickup` (`IsLoot = true`): toplam 1–10 ise 1, 11–20 ise 2, 21 ve üzeri ise 3 üst üste yaprak görünür. Karakter 32 px'e gelince her tür için `TryAdd` çağır; sığmayan adet yığında kalır, gösterim güncellenir. 45 sn sonra kaybolur; 80 sınırına sayılmaz | 3.10 |
-| [ ] Alan uyarısı: bir sonraki daralmaya 10 sn kala yeni sınır yerde kesikli çizgiyle görünsün ve `ZoneWarning` yayınlansın. `WillBeOutsideWithin(pos, sn)` botlar için doğru çalışsın | 3.8, BOT-04 |
+| [ ] `WillBeOutsideWithin(pos, sn)` botlar için doğru çalışsın. (Daralmadan önce yeni sınırın yerde gösterilmesi v1.4'te kalktı; `ZoneWarning` yayınlanmaz) | 3.8, BOT-04 |
 | [ ] Furkan'ın sprite'larını prefab'larına bağla: yaprak (4 tür), ağaç, kütük, ulu ağaç, çalılık, kaya, zemin karoları, ganimet (1/2/3), alan örtüsü. Sprite dosyalarına dokunmazsın; yalnızca kendi prefab'larında onları seçersin | — |
 | [ ] Debug: editörde (Gizmos) ağaç canları, yaprak düşme yarıçapı, çalılık sınırları, alan yarıçapı | — |
 
