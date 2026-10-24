@@ -41,6 +41,9 @@ namespace LeafBrawl.World
         public MapItemKind Kind { get; set; }
         public int Group { get; set; }
 
+        /// <summary>Kalan can (debug ve Gizmos için).</summary>
+        public int Hp => _hp;
+
         void Awake()
         {
             _hp = Services.Config.trees.choppableHp;

@@ -35,6 +35,7 @@ namespace LeafBrawl.World
         {
             MapGenSettings s = MapGenSettings.FromConfig(Services.Config);
             Build(MapLayoutGenerator.Generate(s, Services.Rng), s);
+            if (GetComponent<WorldGizmos>() == null) gameObject.AddComponent<WorldGizmos>();   // yalnızca editörde çizer
         }
 
         /// <summary>Eski çocukları siler ve verilen yerleşimi baştan kurar. Editördeki önizleme de bunu kullanır.</summary>
@@ -113,7 +114,11 @@ namespace LeafBrawl.World
             AddSprite(tree.transform, Circle, color, "Characters", 0, it.RadiusPx * 2f, it.RadiusPx * 2f);
 
             // Ulu ağaç kesilemez, küme ve koru ağaçları kesilebilir (SRS 3.5).
-            if (it.Kind == MapItemKind.GreatTree) tree.AddComponent<GreatTree>();
+            if (it.Kind == MapItemKind.GreatTree)
+            {
+                tree.AddComponent<GreatTree>();
+                tree.AddComponent<CanopyFade>().Init(Services.Config.map.greatTreeCanopyRadiusPx);   // FR-54
+            }
             else
             {
                 var choppable = tree.AddComponent<ChoppableTree>();
