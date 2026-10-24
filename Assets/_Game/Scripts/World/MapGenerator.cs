@@ -96,6 +96,7 @@ namespace LeafBrawl.World
         }
 
         // Gövde: Obstacle katmanında çarpışan collider. Balta için ayrıca Tree katmanında trigger "Vurus" çocuğu.
+        // Kesilebilirlik ve vuruş davranışı GreatTree / ChoppableTree bileşenlerinde.
         void BuildTree(MapItem it, string name, Color color)
         {
             GameObject tree = NewObject(name, transform, _layerObstacle);
@@ -110,6 +111,15 @@ namespace LeafBrawl.World
             hitbox.isTrigger = true;
 
             AddSprite(tree.transform, Circle, color, "Characters", 0, it.RadiusPx * 2f, it.RadiusPx * 2f);
+
+            // Ulu ağaç kesilemez, küme ve koru ağaçları kesilebilir (SRS 3.5).
+            if (it.Kind == MapItemKind.GreatTree) tree.AddComponent<GreatTree>();
+            else
+            {
+                var choppable = tree.AddComponent<ChoppableTree>();
+                choppable.Kind = it.Kind;
+                choppable.Group = it.Group;
+            }
         }
 
         void BuildRock(MapItem it, MapGenSettings s)
@@ -181,8 +191,8 @@ namespace LeafBrawl.World
         }
 
         // Yer tutucu şekiller koddan üretilir (dosya eklemeyiz: Art/ Furkan'ın). 64x64 beyaz resim, 1 birim büyüklüğünde.
-        static Sprite Circle => _circle != null ? _circle : (_circle = MakeSprite(true));
-        static Sprite Square => _square != null ? _square : (_square = MakeSprite(false));
+        internal static Sprite Circle => _circle != null ? _circle : (_circle = MakeSprite(true));
+        internal static Sprite Square => _square != null ? _square : (_square = MakeSprite(false));
 
         static Sprite MakeSprite(bool circle)
         {

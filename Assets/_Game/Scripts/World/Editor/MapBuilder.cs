@@ -6,7 +6,7 @@ namespace LeafBrawl.World
 {
     /// <summary>
     /// Menü: Leaf Brawl → Haritayı Kur.
-    /// 1) Map.prefab'ta MapGenerator yoksa ekler.
+    /// 1) Map.prefab'ta MapGenerator ve LeafSpawner yoksa ekler.
     /// 2) Açık sahnede bir MapGenerator varsa haritayı önizleme olarak kurar (kaydedilmez).
     /// Harita her maç tohumdan değiştiği için prefab'a sabit öğe gömülmez; asıl kurulum Play'de MapGenerator.Awake'te olur.
     /// </summary>
@@ -17,7 +17,7 @@ namespace LeafBrawl.World
         [MenuItem("Leaf Brawl/Haritayı Kur")]
         static void Run()
         {
-            EnsureGeneratorOnPrefab();
+            EnsureComponentsOnPrefab();
 
             MapGenerator generator = Object.FindAnyObjectByType<MapGenerator>();
             if (generator == null)
@@ -34,15 +34,18 @@ namespace LeafBrawl.World
                       (layout.UsedFallback ? " (YEDEK düzen)" : "") + ". Sahneye kaydedilmez; Play'de her maç yeniden kurulur.");
         }
 
-        static void EnsureGeneratorOnPrefab()
+        static void EnsureComponentsOnPrefab()
         {
             GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
             try
             {
-                if (root.GetComponent<MapGenerator>() != null) return;
-                root.AddComponent<MapGenerator>();
+                bool changed = false;
+                if (root.GetComponent<MapGenerator>() == null) { root.AddComponent<MapGenerator>(); changed = true; }
+                if (root.GetComponent<LeafSpawner>() == null) { root.AddComponent<LeafSpawner>(); changed = true; }
+                if (!changed) return;
+
                 PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
-                Debug.Log("[Harita] Map.prefab'a MapGenerator eklendi.");
+                Debug.Log("[Harita] Map.prefab'a eksik bileşenler eklendi (MapGenerator, LeafSpawner).");
             }
             finally
             {
