@@ -34,5 +34,7 @@ namespace LeafBrawl.Shared
     {
         Vector2 Position { get; }
         bool IsLoot { get; }
+        /// <summary>Yaprağın türü. Ganimet yığını (IsLoot) birden çok tür taşır; orada anlamı yoktur, yok sayılır.</summary>
+        LeafType Type { get; }
     }
 }
