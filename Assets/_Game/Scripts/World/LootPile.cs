@@ -19,7 +19,8 @@ namespace LeafBrawl.World
         static readonly Color PileColor = new Color32(190, 110, 50, 255);
 
         readonly int[] _counts = new int[4];   // LeafType sırasıyla: Red, Yellow, Green, Orange
-        Transform[] _visuals;
+        Transform[] _visuals;     // yer tutucu: üst üste daireler
+        SpriteRenderer _sprite;   // Furkan'ın ganimet sprite'ı varsa tek resim (1, 2 veya 3 yapraklı)
         float _age;
 
         public Vector2 Position => transform.position;
@@ -40,6 +41,16 @@ namespace LeafBrawl.World
 
             var pile = go.AddComponent<LootPile>();
             counts.CopyTo(pile._counts, 0);
+
+            if (MapGenerator.Sprites.loot != null && MapGenerator.Sprites.loot.Length > 0)
+            {
+                var visual = new GameObject("Gorsel");
+                visual.transform.SetParent(go.transform, false);
+                pile._sprite = visual.AddComponent<SpriteRenderer>();
+                pile._sprite.sortingLayerName = "Pile";
+                pile.Refresh();
+                return pile;
+            }
 
             pile._visuals = new Transform[MaxVisible];
             for (int i = 0; i < MaxVisible; i++)
@@ -103,6 +114,11 @@ namespace LeafBrawl.World
             var loot = Services.Config.loot;
             int total = Total;
             int shown = total <= loot.oneLeafMaxTotal ? 1 : total <= loot.twoLeavesMaxTotal ? 2 : 3;
+            if (_sprite != null)
+            {
+                _sprite.sprite = WorldSprites.Pick(MapGenerator.Sprites.loot, shown - 1);
+                return;
+            }
             for (int i = 0; i < _visuals.Length; i++)
                 _visuals[i].gameObject.SetActive(i < shown);
         }

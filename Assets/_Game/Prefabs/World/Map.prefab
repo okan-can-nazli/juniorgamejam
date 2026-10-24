@@ -72,6 +72,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 193b169e044acad4ba8ca61a27edc021, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LeafBrawl.World.MapGenerator
+  sprites:
+    border: {fileID: 21300000, guid: 8117c6421444449739d6da3583d03303, type: 3}
+    trunks:
+    - {fileID: -4996362544893166105, guid: 4a63652c186bc4e85b78bb0de691147f, type: 3}
+    - {fileID: -7172905041396102245, guid: 4a63652c186bc4e85b78bb0de691147f, type: 3}
+    - {fileID: 5756340661377120648, guid: 4a63652c186bc4e85b78bb0de691147f, type: 3}
+    canopies:
+    - {fileID: 21300000, guid: 96e0d13fcb71a4e87b781ef348b1f271, type: 3}
+    - {fileID: 21300000, guid: 29cde12549bbb49f09dba6be9b76ebf3, type: 3}
+    - {fileID: 21300000, guid: 06eb8d711b0644ed5b2d8b9dc0c38e1b, type: 3}
+    stump: {fileID: 21300000, guid: 229875af855724c1281ad9dfdbf2bc03, type: 3}
+    greatTrunk: {fileID: 21300000, guid: fd0bcbfa0f07d47eaac9bfb036db363a, type: 3}
+    greatCanopy: {fileID: 21300000, guid: e790840e6b99c4bf1af93cc1bb993dbc, type: 3}
+    rocks:
+    - {fileID: 21300000, guid: 9f8ccd0ceb4624fd0aec5934edf1218f, type: 3}
+    - {fileID: 21300000, guid: c129bdfc8964d4418a5dd940a3b2326a, type: 3}
+    outerBushes:
+    - {fileID: 21300000, guid: 2b70777cfa15549c78393b63783579b2, type: 3}
+    - {fileID: 21300000, guid: b5e326f6f369c426c9c1ff876e69a92a, type: 3}
+    innerBushes:
+    - {fileID: 21300000, guid: 147ce5e64be164044a799ff90bf19768, type: 3}
+    - {fileID: 21300000, guid: 79f202a2681694d39853c461d925b248, type: 3}
+    leaves:
+    - {fileID: 21300000, guid: d961b3db144bc462bb87db023f41d9b1, type: 3}
+    - {fileID: 21300000, guid: bc066bfb3019047ca8b3d44dd7cf93f1, type: 3}
+    - {fileID: 21300000, guid: 915d10ddc6ad341fda2c49c8b3195382, type: 3}
+    - {fileID: 21300000, guid: 9e7d461b7e7e14f6c83313edb908def0, type: 3}
+    loot:
+    - {fileID: 21300000, guid: 4d1aaa70fbdc74553b6ebb891064ca58, type: 3}
+    - {fileID: 21300000, guid: ef82fd4347c5c4be498caac2c08813b3, type: 3}
+    - {fileID: 21300000, guid: 0e7bd87cec6d14b228e32b1fc8244dae, type: 3}
+    zoneClouds:
+    - {fileID: -3186294025785315564, guid: 566dbf73fb91244aa820a46d1badec1a, type: 3}
+    - {fileID: 5097678000325142030, guid: 566dbf73fb91244aa820a46d1badec1a, type: 3}
+    - {fileID: 2413463004272226754, guid: 566dbf73fb91244aa820a46d1badec1a, type: 3}
 --- !u!114 &7691036089937997864
 MonoBehaviour:
   m_ObjectHideFlags: 0

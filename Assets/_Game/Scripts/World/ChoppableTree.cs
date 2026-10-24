@@ -95,12 +95,24 @@ namespace LeafBrawl.World
             _visual.localPosition = Vector3.zero;
             if (_bar != null) _bar.gameObject.SetActive(false);
 
-            // Yer tutucu kütük: gövdeden küçük, koyu renk, karakterlerin altında.
-            _visual.localScale *= StumpScale;
+            // Kütük karakterlerin altında çizilir. Furkan'ın kütük sprite'ı yoksa yer tutucu: gövdeden küçük, koyu renk.
             var sr = _visual.GetComponent<SpriteRenderer>();
-            sr.color = StumpColor;
+            Sprite stump = MapGenerator.Sprites.stump;
+            if (stump != null)
+            {
+                sr.sprite = stump;
+                sr.color = Color.white;
+            }
+            else
+            {
+                _visual.localScale *= StumpScale;
+                sr.color = StumpColor;
+            }
             sr.sortingLayerName = "Ground";
             sr.sortingOrder = 2;
+
+            Transform canopy = transform.Find("Tac");   // kesilen ağacın tacı kalmaz
+            if (canopy != null) canopy.gameObject.SetActive(false);
 
             GameEvents.RaiseTreeFelled(this, by);
         }

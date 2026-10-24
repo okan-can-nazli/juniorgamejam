@@ -6,7 +6,7 @@ namespace LeafBrawl.World
 {
     /// <summary>
     /// Map.prefab üzerinde (SRS 3.12). Maç başında yerleşimi MapLayoutGenerator'dan alıp sahneye kurar.
-    /// Görseller gelene kadar yer tutucu şekiller kullanılır; çarpışma ve katmanlar gerçektir.
+    /// Görseller Furkan'ın sprite'larıdır (WorldSprites, prefab'ta atanır); atanmamış olan için yer tutucu şekil çizilir.
     /// WorldService ve LeafSpawner'dan önce hazır olsun diye Awake'te ve erken sırada çalışır.
     /// </summary>
     [DefaultExecutionOrder(-100)]
@@ -20,7 +20,16 @@ namespace LeafBrawl.World
         static readonly Color RockColor = new Color32(130, 130, 130, 255);
         static readonly Color BushColor = new Color32(40, 100, 50, 200);
 
+        // Sprite'lı sınır görselinin kalınlığı: kamera haritanın kenarındayken ekranın dışarı taşan yarısını kaplasın.
+        const float BorderVisualUnits = 20f;
+
         static Sprite _circle, _square;
+
+        [Tooltip("Furkan'ın dünya görselleri (Art/Sprites). Boş bırakılan alan için yer tutucu şekil çizilir.")]
+        [SerializeField] WorldSprites sprites = new WorldSprites();
+
+        /// <summary>Map.prefab'ta atanmış dünya görselleri; Leaf, LootPile, ChoppableTree ve SafeZoneView okur.</summary>
+        public static WorldSprites Sprites { get; private set; } = new WorldSprites();
 
         readonly List<Vector2> _spawnPoints = new List<Vector2>();
         int _layerObstacle, _layerTree, _layerBush;
@@ -45,6 +54,7 @@ namespace LeafBrawl.World
             _layerTree = LayerMask.NameToLayer("Tree");
             _layerBush = LayerMask.NameToLayer("Bush");
 
+            Sprites = sprites ?? new WorldSprites();
             Clear();
             Layout = layout;
             _spawnPoints.Clear();
@@ -52,16 +62,18 @@ namespace LeafBrawl.World
             BuildGround(s);
             BuildBounds(s);
 
-            foreach (MapItem it in layout.Items)
+            // index: görsel çeşidi seçmek için öğenin sırası (Rng kullanılmaz, NFR-07).
+            for (int index = 0; index < layout.Items.Count; index++)
             {
+                MapItem it = layout.Items[index];
                 switch (it.Kind)
                 {
-                    case MapItemKind.GreatTree: BuildTree(it, "UluAgac", GreatTrunkColor); break;
-                    case MapItemKind.ClusterTree: BuildTree(it, "Kume" + it.Group + "_Agac", TrunkColor); break;
-                    case MapItemKind.GroveTree: BuildTree(it, "Koru" + it.Group + "_Agac", TrunkColor); break;
-                    case MapItemKind.Rock: BuildRock(it, s); break;
+                    case MapItemKind.GreatTree: BuildTree(it, "UluAgac", GreatTrunkColor, index); break;
+                    case MapItemKind.ClusterTree: BuildTree(it, "Kume" + it.Group + "_Agac", TrunkColor, index); break;
+                    case MapItemKind.GroveTree: BuildTree(it, "Koru" + it.Group + "_Agac", TrunkColor, index); break;
+                    case MapItemKind.Rock: BuildRock(it, s, index); break;
                     case MapItemKind.OuterBush:
-                    case MapItemKind.InnerBush: BuildBush(it); break;
+                    case MapItemKind.InnerBush: BuildBush(it, index); break;
                     case MapItemKind.Spawn: BuildSpawn(it); break;
                 }
             }
@@ -87,6 +99,14 @@ namespace LeafBrawl.World
             AddWall(bounds, new Vector2(0f, -half - t * 0.5f), new Vector2(half * 2f + t * 2f, t));
             AddWall(bounds, new Vector2(half + t * 0.5f, 0f), new Vector2(t, half * 2f));
             AddWall(bounds, new Vector2(-half - t * 0.5f, 0f), new Vector2(t, half * 2f));
+
+            // Sınırın dışı: Furkan'ın döşenen sınır karosu (yalnızca görsel).
+            if (Sprites.border == null) return;
+            const float v = BorderVisualUnits;
+            AddTiled(bounds.transform, Sprites.border, new Vector2(0f, half + v * 0.5f), new Vector2(half * 2f + v * 2f, v));
+            AddTiled(bounds.transform, Sprites.border, new Vector2(0f, -half - v * 0.5f), new Vector2(half * 2f + v * 2f, v));
+            AddTiled(bounds.transform, Sprites.border, new Vector2(half + v * 0.5f, 0f), new Vector2(v, half * 2f));
+            AddTiled(bounds.transform, Sprites.border, new Vector2(-half - v * 0.5f, 0f), new Vector2(v, half * 2f));
         }
 
         static void AddWall(GameObject go, Vector2 offset, Vector2 size)
@@ -98,7 +118,7 @@ namespace LeafBrawl.World
 
         // Gövde: Obstacle katmanında çarpışan collider. Balta için ayrıca Tree katmanında trigger "Vurus" çocuğu.
         // Kesilebilirlik ve vuruş davranışı GreatTree / ChoppableTree bileşenlerinde.
-        void BuildTree(MapItem it, string name, Color color)
+        void BuildTree(MapItem it, string name, Color color, int index)
         {
             GameObject tree = NewObject(name, transform, _layerObstacle);
             tree.transform.localPosition = ToUnits(it.PosPx);
@@ -111,23 +131,30 @@ namespace LeafBrawl.World
             hitbox.radius = body.radius;
             hitbox.isTrigger = true;
 
-            AddSprite(tree.transform, Circle, color, "Characters", 0, it.RadiusPx * 2f, it.RadiusPx * 2f);
+            bool great = it.Kind == MapItemKind.GreatTree;
+            Sprite trunk = great ? Sprites.greatTrunk : WorldSprites.Pick(Sprites.trunks, index);
+            if (trunk != null) AddNative(tree.transform, trunk, "Characters", 0);
+            else AddSprite(tree.transform, Circle, color, "Characters", 0, it.RadiusPx * 2f, it.RadiusPx * 2f);
 
             // Ulu ağaç kesilemez, küme ve koru ağaçları kesilebilir (SRS 3.5).
-            if (it.Kind == MapItemKind.GreatTree)
+            if (great)
             {
                 tree.AddComponent<GreatTree>();
-                tree.AddComponent<CanopyFade>().Init(Services.Config.map.greatTreeCanopyRadiusPx);   // FR-54
+                tree.AddComponent<CanopyFade>().Init(Services.Config.map.greatTreeCanopyRadiusPx, Sprites.greatCanopy);   // FR-54
             }
             else
             {
                 var choppable = tree.AddComponent<ChoppableTree>();
                 choppable.Kind = it.Kind;
                 choppable.Group = it.Group;
+
+                // Küme ve koru ağacının tacı da altında karakter varken saydamlaşır (SRS 3.11, FR-54). Yarıçap tacın resminden.
+                Sprite canopy = WorldSprites.Pick(Sprites.canopies, index);
+                if (canopy != null) tree.AddComponent<CanopyFade>().Init(Units.ToPx(canopy.bounds.extents.x), canopy);
             }
         }
 
-        void BuildRock(MapItem it, MapGenSettings s)
+        void BuildRock(MapItem it, MapGenSettings s, int index)
         {
             GameObject rock = NewObject("Kaya" + it.Group, transform, _layerObstacle);
             rock.transform.localPosition = ToUnits(it.PosPx);
@@ -135,11 +162,13 @@ namespace LeafBrawl.World
             var box = rock.AddComponent<BoxCollider2D>();
             box.size = new Vector2(Units.ToUnits(s.RockSizePx), Units.ToUnits(s.RockSizePx));
 
-            AddSprite(rock.transform, Square, RockColor, "Characters", 0, s.RockSizePx, s.RockSizePx);
+            Sprite sprite = WorldSprites.Pick(Sprites.rocks, index);
+            if (sprite != null) AddNative(rock.transform, sprite, "Characters", 0);
+            else AddSprite(rock.transform, Square, RockColor, "Characters", 0, s.RockSizePx, s.RockSizePx);
         }
 
         // Çalılık engel değil: Bush katmanında trigger.
-        void BuildBush(MapItem it)
+        void BuildBush(MapItem it, int index)
         {
             string name = (it.Kind == MapItemKind.OuterBush ? "DisCalilik" : "IcCalilik") + it.Group;
             GameObject bush = NewObject(name, transform, _layerBush);
@@ -149,7 +178,9 @@ namespace LeafBrawl.World
             trigger.radius = Units.ToUnits(it.RadiusPx);
             trigger.isTrigger = true;
 
-            AddSprite(bush.transform, Circle, BushColor, "Bushes", 0, it.RadiusPx * 2f, it.RadiusPx * 2f);
+            Sprite sprite = WorldSprites.Pick(it.Kind == MapItemKind.OuterBush ? Sprites.outerBushes : Sprites.innerBushes, index);
+            if (sprite != null) AddNative(bush.transform, sprite, "Bushes", 0);
+            else AddSprite(bush.transform, Circle, BushColor, "Bushes", 0, it.RadiusPx * 2f, it.RadiusPx * 2f);
         }
 
         void BuildSpawn(MapItem it)
@@ -193,6 +224,28 @@ namespace LeafBrawl.World
             sr.color = color;
             sr.sortingLayerName = sortingLayer;
             sr.sortingOrder = order;
+        }
+
+        // Furkan'ın sprite'ı: ölçeklenmez (PPU 16 = SRS 3.13 ölçeği).
+        static void AddNative(Transform parent, Sprite sprite, string sortingLayer, int order)
+        {
+            var sr = NewObject("Gorsel", parent, 0).AddComponent<SpriteRenderer>();
+            sr.sprite = sprite;
+            sr.sortingLayerName = sortingLayer;
+            sr.sortingOrder = order;
+        }
+
+        // Döşenen sprite (harita sınırının dışı); konum ve boyut birim.
+        static void AddTiled(Transform parent, Sprite sprite, Vector2 offset, Vector2 size)
+        {
+            GameObject go = NewObject("Gorsel", parent, 0);
+            go.transform.localPosition = offset;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = sprite;
+            sr.drawMode = SpriteDrawMode.Tiled;
+            sr.size = size;
+            sr.sortingLayerName = "Ground";
+            sr.sortingOrder = 2;
         }
 
         // Yer tutucu şekiller koddan üretilir (dosya eklemeyiz: Art/ Furkan'ın). 64x64 beyaz resim, 1 birim büyüklüğünde.

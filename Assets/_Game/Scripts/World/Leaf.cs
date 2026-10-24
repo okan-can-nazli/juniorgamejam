@@ -45,10 +45,15 @@ namespace LeafBrawl.World
 
             var visual = new GameObject("Gorsel");
             visual.transform.SetParent(go.transform, false);
-            visual.transform.localScale = new Vector3(Units.ToUnits(VisualSizePx), Units.ToUnits(VisualSizePx), 1f);
             var sr = visual.AddComponent<SpriteRenderer>();
-            sr.sprite = MapGenerator.Circle;
-            sr.color = ColorOf(type);
+            Sprite sprite = MapGenerator.Sprites.Leaf(type);
+            if (sprite != null) sr.sprite = sprite;   // Furkan'ın yaprağı, ölçeklenmez
+            else
+            {
+                visual.transform.localScale = new Vector3(Units.ToUnits(VisualSizePx), Units.ToUnits(VisualSizePx), 1f);
+                sr.sprite = MapGenerator.Circle;
+                sr.color = ColorOf(type);
+            }
             sr.sortingLayerName = "Pickups";
 
             var leaf = go.AddComponent<Leaf>();
