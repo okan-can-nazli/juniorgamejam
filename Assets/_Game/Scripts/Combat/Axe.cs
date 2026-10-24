@@ -12,6 +12,7 @@ namespace LeafBrawl.Combat
     public class Axe : MonoBehaviour
     {
         Character _self;
+        AbilityController _abilities;
         int _obstacleMask, _treeMask;
         readonly RaycastHit2D[] _lineHits = new RaycastHit2D[8];
         readonly Collider2D[] _treeHits = new Collider2D[16];
@@ -25,6 +26,7 @@ namespace LeafBrawl.Combat
         void Awake()
         {
             _self = GetComponentInParent<Character>();
+            _abilities = GetComponent<AbilityController>();
             _obstacleMask = LayerMask.GetMask("Obstacle");
             _treeMask = LayerMask.GetMask("Tree");
         }
@@ -47,12 +49,13 @@ namespace LeafBrawl.Combat
                 ResolveHit();
             }
 
-            // FR-20: basılı tutuldukça bekleme bittikçe yeniden savrulur. Üretim sırasında saldırı yok (SRS 3.7).
-            if (!IsSwinging && _self.CurrentIntent.Swing && !_self.Crafting.IsCrafting)
+            // FR-20: basılı tutuldukça bekleme bittikçe yeniden savrulur. Üretim sırasında (SRS 3.7) ve ulti hazırlanırken saldırı yok.
+            bool ultiWindingUp = _abilities != null && _abilities.UltiWindingUp;
+            if (!IsSwinging && _self.CurrentIntent.Swing && !_self.Crafting.IsCrafting && !ultiWindingUp)
                 StartSwing();
 
-            // FR-22: savururken normal hızın %50'si.
-            _self.SpeedMultiplier = IsSwinging ? axe.swingSpeedMultiplier : 1f;
+            // Hız çarpanını yalnızca burası yazar: ulti hazırlanırken 0 (SRS 3.4), savururken %50 (FR-22).
+            _self.SpeedMultiplier = ultiWindingUp ? 0f : IsSwinging ? axe.swingSpeedMultiplier : 1f;
         }
 
         void StartSwing()
