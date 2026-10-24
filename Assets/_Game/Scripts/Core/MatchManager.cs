@@ -125,7 +125,8 @@ namespace LeafBrawl.Core
         {
             if (_pause.WasPressedThisFrame())
             {
-                if (State == MatchState.Paused) Resume();
+                if (State == MatchState.Ended) SceneFlow.LoadMenu();   // FR-08: sonuç ekranında Esc ana menüye döner
+                else if (State == MatchState.Paused) Resume();
                 else Pause();
             }
 

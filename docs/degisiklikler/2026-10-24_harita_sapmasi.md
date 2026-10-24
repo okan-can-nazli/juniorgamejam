@@ -2,7 +2,7 @@
 
 **Kaynak:** Okan'ın PR #4'ü ("Harita üretici: yerleşim, sapma ayarları ve testler", main'e birleşti)
 **Onay:** Yiğit, Okan'la konuşup onayladı. Hamza ve Furkan'ın itirazı yoksa geçerlidir (SRS Bölüm 11, madde 8). İtirazınız varsa bu dosyanın PR'ına yazın.
-**Durum:** SRS **v1.2** olarak yayımlandı (`docs/Leaf_Brawl_SRS_Demo_v1.2.md`; 1.2, 3.12, FR-50, NFR-07, Bölüm 8 ve 11.2). Aşağıdaki 3. ve 4. maddeler v1.2'de düzeltildi. Bu not, SRS dışındaki rehber dosyalarla kalan farkları ve herkesin yapması gerekenleri listeler.
+**Durum:** SRS **v1.2** olarak yayımlandı, **v1.4**'e aynen taşındı (`docs/Leaf_Brawl_SRS_Demo_v1.2.md`; 1.2, 3.12, FR-50, NFR-07, Bölüm 8 ve 11.2). Aşağıdaki 3. ve 4. maddeler v1.2'de düzeltildi. Bu not, SRS dışındaki rehber dosyalarla kalan farkları ve herkesin yapması gerekenleri listeler.
 
 ## Ne değişti?
 

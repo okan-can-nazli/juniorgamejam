@@ -4,7 +4,7 @@ Sonbahar temalı, üstten görünümlü 2D eleme arena oyunu. Unity **6000.6.7f1
 
 ## Her oturumun başında
 1. Bu dosyayı ve kullanıcının görev dosyasını oku: `docs/gorev_dagilimi/<İSİM>_gorevler.md`.
-2. Oyunun ne yapacağını yalnızca **SRS v1.2** söyler: `docs/Leaf_Brawl_SRS_Demo_v1.2.md`. SRS'in dışına çıkma; yazmayan şey demoda yoktur (SRS 8).
+2. Oyunun ne yapacağını yalnızca **SRS v1.4** söyler: `docs/Leaf_Brawl_SRS_Demo_v1.4.md`. SRS'in dışına çıkma; yazmayan şey demoda yoktur (SRS 8).
 3. Ortak sözleşme görev dosyalarındaki "Ortak sözleşme (Shared)" bölümündedir ve `Assets/_Game/Scripts/Shared/` içinde kodlanmıştır.
 
 ## Klasör sahipliği (en önemli kural)

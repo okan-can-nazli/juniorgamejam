@@ -20,7 +20,7 @@ Oyun mantığına yaptığın çağrılar yalnızca şunlar olabilir:
 
 ### Tek doğru kaynak
 
-- Oyunun ne yapacağını **SRS v1.2** söyler: [`docs/Leaf_Brawl_SRS_Demo_v1.2.md`](../Leaf_Brawl_SRS_Demo_v1.2.md). Bu dosyalar yalnızca **işi kimin, nerede, hangi sırayla** yapacağını söyler.
+- Oyunun ne yapacağını **SRS v1.4** söyler: [`docs/Leaf_Brawl_SRS_Demo_v1.4.md`](../Leaf_Brawl_SRS_Demo_v1.4.md). Bu dosyalar yalnızca **işi kimin, nerede, hangi sırayla** yapacağını söyler.
 - Her görevin yanında SRS madde numarası (FR-xx, BOT-xx, UI-xx, KT-xx) yazar. PR açıklamasına bu numaraları yaz.
 - Oyundaki **hiçbir sayı koda yazılmaz.** Bütün değerler `Assets/StreamingAssets/balance.json` dosyasından `Services.Config` ile okunur (NFR-05). Uzunluklar dosyada **dünya px** olarak durur; kodda `Units.ToUnits(px)` ile çevrilir (40 px = 1 Unity birimi).
 
@@ -210,7 +210,7 @@ public interface IWorld {
 | `LeafSpawned` | `Vector2 konum, LeafType` | Okan |
 | `LootDropped` | `Vector2 konum, int toplam` | Okan |
 | `ZonePhaseChanged` | `int aşama` | Okan |
-| `ZoneWarning` | `float sonrakiYarıçapPx` (10 sn kala) | Okan |
+| `ZoneWarning` | `float sonrakiYarıçapPx`. **v1.4'ten beri yayınlanmaz** (alan uyarısı kalktı, SRS 3.8); ad sözleşmede kalır | Okan |
 | `RevealChanged` | `Character, bool` | Okan |
 
 **Unity katmanları** (M0'da Yiğit ayarlar): `Character`, `Obstacle` (gövde, kaya, harita sınırı), `Bush`, `Pickup`, `Tree`.
@@ -331,7 +331,7 @@ Her ses kısa (0,1–1 sn), `.ogg` veya `.wav`, dosya başına 1 MB'tan küçük
 | Tarif başladı / tamamlandı / reddedildi | `CraftStarted` / `CraftCompleted` / `CraftRejected` | FR-45 |
 | Yetenek açıldı, atılma, kalkan açılma ve kırılma, ulti hazırlanma ve patlama | `AbilityUnlocked`, `AbilityUsed`, `ShieldBroken` | NFR-10 |
 | Ölüm | `Died` | NFR-10 |
-| Alan uyarısı | `ZoneWarning` | NFR-10 |
+| Alan daralmasının başlaması | `ZonePhaseChanged` | NFR-10 |
 | Geri sayım bip sesi (3, 2, 1) | `CountdownTick` | FR-05 |
 | Düğme tıklama | Arayüz | — |
 | Müzik (isteğe bağlı) | — | NFR-10 |
