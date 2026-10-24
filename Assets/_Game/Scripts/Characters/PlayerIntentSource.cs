@@ -72,8 +72,15 @@ namespace LeafBrawl.Characters
 
         void Update()
         {
-            if (!_inventory.WasPressedThisFrame()) return;
             var state = Services.Match.State;
+            // Oyuncu ölünce veya maç bitince panel kapanır; sonuç ekranının üstünde kalmasın (FR-07).
+            if (InventoryOpen && (state == MatchState.Ended || !_character.IsAlive))
+            {
+                InventoryOpen = false;
+                GameEvents.RaiseInventoryToggled(false);
+                return;
+            }
+            if (!_inventory.WasPressedThisFrame()) return;
             if (state == MatchState.Paused || state == MatchState.Ended || !_character.IsAlive) return;
             InventoryOpen = !InventoryOpen;
             GameEvents.RaiseInventoryToggled(InventoryOpen);
