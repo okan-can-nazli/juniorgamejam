@@ -24,6 +24,7 @@ namespace LeafBrawl.Core
 
         readonly List<Character> _characters = new List<Character>();
         readonly List<Character> _deathOrder = new List<Character>();
+        InputActionAsset _actions;   // bileşene ait kopya (PlayerIntentSource'unkinden bağımsız)
         InputAction _pause;
         MatchState _stateBeforePause;
         float _countdownLeft;
@@ -54,19 +55,30 @@ namespace LeafBrawl.Core
         public void Restart()
         {
             Time.timeScale = Services.DebugConfig.timeScale;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            var scene = SceneManager.GetActiveScene();
+#if UNITY_EDITOR
+            // Sandbox sahneleri Build Settings'te yok; editörde yolundan yükle.
+            if (scene.buildIndex < 0)
+            {
+                UnityEditor.SceneManagement.EditorSceneManager.LoadSceneInPlayMode(scene.path, new LoadSceneParameters(LoadSceneMode.Single));
+                return;
+            }
+#endif
+            SceneManager.LoadScene(scene.buildIndex);
         }
 
         void Awake()
         {
             Services.Match = this;
-            var map = actions.FindActionMap("Player", true);
+            _actions = Instantiate(actions);
+            var map = _actions.FindActionMap("Player", true);
             _pause = map.FindAction("Pause", true);
             map.Enable();
         }
 
         void OnEnable() => GameEvents.Died += OnDied;
         void OnDisable() => GameEvents.Died -= OnDied;
+        void OnDestroy() => Destroy(_actions);
 
         void Start()
         {
