@@ -37,6 +37,7 @@ namespace LeafBrawl.Presentation
 
         [Header("UI-06 yaprak çubuğunun üstü")]
         [SerializeField] TMP_Text readyText;      // "Güç hazır [1]   Hız hazır [2]"
+        [SerializeField] RectTransform readyBox;  // spr_hud_tarif_hazir_kutu (9-slice); yazı varken görünür, yazıya göre genişler
         [SerializeField] TMP_Text notSafeText;    // "Güvende değilsin" (FR-46)
         [SerializeField] Color readyColor = Color.white;
         [SerializeField] Color readyUnsafeColor = new Color(1f, 1f, 1f, 0.35f);
@@ -150,6 +151,12 @@ namespace LeafBrawl.Presentation
             }
             readyText.text = _sb.ToString();
             readyText.color = player.IsSafe ? readyColor : readyUnsafeColor;
+            if (readyBox != null)
+            {
+                bool any = _sb.Length > 0;
+                readyBox.gameObject.SetActive(any);
+                if (any) readyBox.sizeDelta = new Vector2(readyText.preferredWidth + readyText.fontSize * 1.5f, readyBox.sizeDelta.y);
+            }
         }
 
         // ---------------------------------------------------------------- olaylar
