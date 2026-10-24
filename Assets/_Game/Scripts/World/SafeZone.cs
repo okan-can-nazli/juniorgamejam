@@ -22,12 +22,16 @@ namespace LeafBrawl.World
         public float RadiusPx => RadiusAt(Now);
         public float DamagePerSecond => DamageAt(Now);
 
-        /// <summary>Bir sonraki daralan aşamanın bitiş yarıçapı; kalmadıysa son yarıçap.</summary>
+        /// <summary>
+        /// Alanın varacağı bir sonraki yarıçap: daralma sürüyorsa bu daralmanın bitiş yarıçapı,
+        /// değilse bir sonraki daralan aşamanın bitiş yarıçapı; kalmadıysa son yarıçap (#13).
+        /// </summary>
         public float NextRadiusPx
         {
             get
             {
-                int next = NextShrinkIndex(Now);
+                int next = ShrinkingIndex(Now);
+                if (next < 0) next = NextShrinkIndex(Now);
                 return next < 0 ? RadiusAt(float.MaxValue) : Services.Config.zone.phases[next].endRadiusPx;
             }
         }
@@ -106,6 +110,15 @@ namespace LeafBrawl.World
             ZoneConfig zone = Services.Config.zone;
             int phase = PhaseAt(t);
             return phase >= zone.phases.Length ? zone.suddenDeathDamagePerSec : zone.phases[phase].damagePerSec;
+        }
+
+        // t anında süren daralan aşama; yoksa -1.
+        static int ShrinkingIndex(float t)
+        {
+            ZonePhase[] phases = Services.Config.zone.phases;
+            for (int i = 0; i < phases.Length; i++)
+                if (phases[i].startSec <= t && t < phases[i].endSec && phases[i].endRadiusPx < phases[i].startRadiusPx) return i;
+            return -1;
         }
 
         // t'den sonra başlayan ilk daralan aşama (yarıçapı küçülen); yoksa -1.
