@@ -84,8 +84,23 @@ namespace LeafBrawl.World
         void BuildGround(MapGenSettings s)
         {
             GameObject ground = NewObject("Zemin", transform, 0);
-            AddSprite(ground.transform, Square, GrassColor, "Ground", 0, s.MapSizePx, s.MapSizePx);
-            AddSprite(ground.transform, Circle, ClearingColor, "Ground", 1, s.ClearingRadiusPx * 2f, s.ClearingRadiusPx * 2f);
+            float mapUnits = Units.ToUnits(s.MapSizePx);
+            float clearingUnits = Units.ToUnits(s.ClearingRadiusPx * 2f);
+
+            if (Sprites.grass != null) AddTiled(ground.transform, Sprites.grass, Vector2.zero, new Vector2(mapUnits, mapUnits), 0);
+            else AddSprite(ground.transform, Square, GrassColor, "Ground", 0, s.MapSizePx, s.MapSizePx);
+
+            if (Sprites.clearing == null)
+            {
+                AddSprite(ground.transform, Circle, ClearingColor, "Ground", 1, s.ClearingRadiusPx * 2f, s.ClearingRadiusPx * 2f);
+                return;
+            }
+            // Açıklık karosu kare döşenir, dairesel maske açıklığın dışını gizler.
+            GameObject mask = NewObject("AciklikMaske", ground.transform, 0);
+            mask.transform.localScale = new Vector3(clearingUnits, clearingUnits, 1f);
+            mask.AddComponent<SpriteMask>().sprite = Circle;
+            SpriteRenderer clearing = AddTiled(ground.transform, Sprites.clearing, Vector2.zero, new Vector2(clearingUnits, clearingUnits), 1);
+            clearing.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
         }
 
         // Harita sınırı: 4 kutu collider, Obstacle katmanında, haritanın hemen dışında.
@@ -235,8 +250,8 @@ namespace LeafBrawl.World
             sr.sortingOrder = order;
         }
 
-        // Döşenen sprite (harita sınırının dışı); konum ve boyut birim.
-        static void AddTiled(Transform parent, Sprite sprite, Vector2 offset, Vector2 size)
+        // Döşenen sprite (zemin, açıklık, harita sınırının dışı); konum ve boyut birim.
+        static SpriteRenderer AddTiled(Transform parent, Sprite sprite, Vector2 offset, Vector2 size, int order = 2)
         {
             GameObject go = NewObject("Gorsel", parent, 0);
             go.transform.localPosition = offset;
@@ -245,7 +260,8 @@ namespace LeafBrawl.World
             sr.drawMode = SpriteDrawMode.Tiled;
             sr.size = size;
             sr.sortingLayerName = "Ground";
-            sr.sortingOrder = 2;
+            sr.sortingOrder = order;
+            return sr;
         }
 
         // Yer tutucu şekiller koddan üretilir (dosya eklemeyiz: Art/ Furkan'ın). 64x64 beyaz resim, 1 birim büyüklüğünde.
