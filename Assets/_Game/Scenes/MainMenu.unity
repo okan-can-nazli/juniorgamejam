@@ -2257,7 +2257,7 @@ MonoBehaviour:
   guideBackButton: {fileID: 1765616836}
   pages:
   - title: "1. Yaprak toplama ve a\u011Fa\xE7 kesme"
-    body: "Yerdeki yapra\u011F\u0131n \xFCst\xFCnden ge\xE7ince otomatik toplan\u0131r. A\u011Fa\xE7lar zamanla yaprak d\xFC\u015F\xFCr\xFCr; baltayla (sol t\u0131k veya L) keserek 6\u201310 yaprak birden al\u0131rs\u0131n. Ortadaki ulu a\u011Fa\xE7 kesilmez ama en \xE7ok yapra\u011F\u0131 o d\xFC\u015F\xFCr\xFCr."
+    body: "Yerdeki yapra\u011F\u0131n \xFCst\xFCnden ge\xE7ince otomatik toplan\u0131r. A\u011Fa\xE7lar zamanla yaprak d\xFC\u015F\xFCr\xFCr; baltayla (sol t\u0131k veya L) keserek 10\u201316 yaprak birden al\u0131rs\u0131n. Ortadaki ulu a\u011Fa\xE7 kesilmez ama en \xE7ok yapra\u011F\u0131 o d\xFC\u015F\xFCr\xFCr."
     image: {fileID: 21300000, guid: 29cde12549bbb49f09dba6be9b76ebf3, type: 3}
   - title: "2. Tarifler, seviyeler ve g\xFCvende kural\u0131"
     body: "G\xFC\xE7, H\u0131z ve Sa\u011Fl\u0131k 1. seviyeden ba\u015Flar, en fazla 5'e \xE7\u0131kar; 1, 2 ve 3 tu\u015Flar\u0131yla yaprak harcay\u0131p bir seviye y\xFCkseltirsin. Her seviye bir \xF6ncekinden daha \xE7ok yaprak ister. Tarif yaln\u0131zca g\xFCvendeyken \xFCretilir: alan\u0131n i\xE7inde ol, son 3 saniyede hasar alma ve balta savurma."

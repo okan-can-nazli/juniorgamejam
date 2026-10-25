@@ -109,15 +109,15 @@
         "priorityTough": ["Health", "Power", "Speed"]
     },
     "trees": {
-        "greatSpawnIntervalSec": 5,
+        "greatSpawnIntervalSec": 3,
         "greatOrangeChance": 0.25,
-        "clusterSpawnIntervalSec": 45,
+        "clusterSpawnIntervalSec": 20,
         "clusterOrangeChance": 0.05,
-        "groveSpawnIntervalSec": 60,
+        "groveSpawnIntervalSec": 25,
         "groveOrangeChance": 0.02,
-        "choppableHp": 400,
-        "felledLeavesMin": 6,
-        "felledLeavesMax": 10,
+        "choppableHp": 240,
+        "felledLeavesMin": 10,
+        "felledLeavesMax": 16,
         "felledOrangeChance": 0.1,
         "dropRadiusPx": 120,
         "hpBarSec": 2
@@ -125,9 +125,9 @@
     "leaves": {
         "lifetimeSec": 45,
         "blinkBeforeSec": 5,
-        "maxOnMap": 80,
+        "maxOnMap": 120,
         "fallMaxSec": 0.6,
-        "startPerCluster": 3,
+        "startPerCluster": 5,
         "startAtGreatTree": 2,
         "startAtGreatTreeOrange": 1,
         "maxDropTries": 20

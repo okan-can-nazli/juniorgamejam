@@ -144,16 +144,16 @@ Yapraklar **yalnızca ağaçlardan** düşer. Ağaçlar iki yolla yaprak verir: 
 
 | Ağaç | Adet | Kendiliğinden üretim | Turuncu olasılığı | Kesilebilir mi |
 | --- | --- | --- | --- | --- |
-| Ulu ağaç (merkez) | 1 | 5 sn'de 1 yaprak | %25 | Hayır |
-| Küme ağacı | 8 küme × 3 = 24 | Her ağaç 45 sn'de 1 yaprak (küme başına ≈15 sn'de 1) | %5 | Evet |
-| Koru ağacı (köşe koruları) | 4 koru × 5 = 20 | Her ağaç 60 sn'de 1 yaprak (koru başına 12 sn'de 1) | %2 | Evet |
+| Ulu ağaç (merkez) | 1 | 3 sn'de 1 yaprak | %25 | Hayır |
+| Küme ağacı | 8 küme × 3 = 24 | Her ağaç 20 sn'de 1 yaprak (küme başına ≈7 sn'de 1) | %5 | Evet |
+| Koru ağacı (köşe koruları) | 4 koru × 5 = 20 | Her ağaç 25 sn'de 1 yaprak (koru başına 5 sn'de 1) | %2 | Evet |
 
 - Turuncu olmayan yaprak K, S, Y arasında eşit olasılıkla seçilir.
 - Yaprak, ağacın gövdesinin 120 px çevresinde rastgele bir noktaya düşer. Nokta bir gövdenin, kayanın içinde veya harita dışındaysa geçerli bir nokta bulunana kadar yeniden seçilir.
 - Maç başında her ağaç kümesinin çevresinde 3, ulu ağacın çevresinde 2 yaprak hazır bulunur (ulu ağacın yanındakilerden biri turuncu).
-- Yerdeki bir yaprak 45 sn sonra kaybolur. Haritada aynı anda en fazla 80 yaprak bulunur; sınır doluyken ağaçlar kendiliğinden üretmez.
-- **Ağaç kesme:** Kesilebilir her ağacın canı 400'dür. Balta ağaca karakterlere verdiği hasarı verir; böylece Güç 1'deki bir oyuncu bir ağacı yaklaşık 20 sn'de (40 vuruş) keser, Güç 5'teki oyuncu yaklaşık 9 sn'de keser.
-- Kesilen ağaç, gövdesinin 120 px çevresine **6–10 adet** (rastgele) yaprak saçar; her birinin turuncu olma olasılığı %10'dur. Bu yapraklar 80 yaprak sınırına sayılmaz.
+- Yerdeki bir yaprak 45 sn sonra kaybolur. Haritada aynı anda en fazla 120 yaprak bulunur; sınır doluyken ağaçlar kendiliğinden üretmez.
+- **Ağaç kesme:** Kesilebilir her ağacın canı 240'tır. Balta ağaca karakterlere verdiği hasarı verir; böylece Güç 1'deki bir oyuncu bir ağacı yaklaşık 12 sn'de (24 vuruş) keser, Güç 5'teki oyuncu yaklaşık 5 sn'de keser.
+- Kesilen ağaç, gövdesinin 120 px çevresine **10–16 adet** (rastgele) yaprak saçar; her birinin turuncu olma olasılığı %10'dur. Bu yapraklar 120 yaprak sınırına sayılmaz.
 - Kesilen ağacın yerinde **kütük** kalır. Kütük engel değildir, yaprak üretmez ve maç boyunca yeniden büyümez.
 
 ### 3.6 Yapraklar ve envanter
@@ -213,7 +213,7 @@ Tehdit puanı = karakterin Güç, Hız ve Sağlık geliştirmelerinde 1. seviyen
 
 ### 3.10 Ölüm ganimeti
 
-Ölen karakterin envanterinden K, S, Y türlerinin her birinin %35'i (aşağı yuvarlanır) ve T'nin %60'ı (yukarı yuvarlanır) öldüğü noktada **tek bir ganimet yığını** olarak yere bırakılır. Kalan yapraklar yok olur. Ganimet 80 yaprak sınırına sayılmaz ve 45 sn sonra kaybolur.
+Ölen karakterin envanterinden K, S, Y türlerinin her birinin %35'i (aşağı yuvarlanır) ve T'nin %60'ı (yukarı yuvarlanır) öldüğü noktada **tek bir ganimet yığını** olarak yere bırakılır. Kalan yapraklar yok olur. Ganimet 120 yaprak sınırına sayılmaz ve 45 sn sonra kaybolur.
 
 Görüntü kirliliğini önlemek için ganimet tek tek yaprak olarak gösterilmez:
 
