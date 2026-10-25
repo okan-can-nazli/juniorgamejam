@@ -132,10 +132,12 @@ namespace LeafBrawl.Presentation
             // FR-42: en üst seviye / güvende değil / üretilebilir.
             bool notSafe = !maxLevel && fail == CraftFail.NotSafe;
             card.Status.text = maxLevel ? "En üst seviye" : notSafe ? "Güvende değilsin" : crafting.IsCrafting && crafting.Current == card.Recipe ? "Üretiliyor" : "";
-            card.Status.color = notSafe && rejected ? missingColor : darkText;
+            var text = canCraft ? darkText : lightText;   // soluk kart koyu gri; açık yazı okunur (NFR-08)
+            card.Title.color = card.Cost.color = text;
+            card.Status.color = notSafe && rejected ? missingColor : text;
 
             card.Background.sprite = canCraft ? cardActiveSprite : cardPassiveSprite;
-            card.Background.color = canCraft ? Color.white : new Color(1f, 1f, 1f, 0.8f);
+            card.Background.color = Color.white;
             // Uyarı varken buton yerine uyarı yazısı; yoksa buton (üretilemiyorsa soluk).
             bool showButton = card.Status.text.Length == 0;
             card.Button.enabled = card.ButtonLabel.enabled = showButton;
@@ -184,12 +186,12 @@ namespace LeafBrawl.Presentation
                 button.targetGraphic = bg;
                 button.onClick.AddListener(() => OnCardClicked(recipe));
                 var card = new Card { Recipe = recipe, Background = bg };
-                card.Title = NewText(bg.transform, "Baslik", "", new Vector2(-19, 5), new Vector2(74, 9), 6.5f, darkText, TextAlignmentOptions.Left);
-                card.Cost = NewText(bg.transform, "Maliyet", "", new Vector2(-19, -5), new Vector2(74, 9), 6f, darkText, TextAlignmentOptions.Left);
+                card.Title = NewText(bg.transform, "Baslik", "", new Vector2(-19, 5), new Vector2(74, 9), 7f, darkText, TextAlignmentOptions.Left);
+                card.Cost = NewText(bg.transform, "Maliyet", "", new Vector2(-19, -5), new Vector2(74, 9), 6.5f, darkText, TextAlignmentOptions.Left);
                 card.Button = NewImage(bg.transform, "Uret", craftButtonSprite, new Vector2(37, 0), new Vector2(40, 14));
                 card.Button.raycastTarget = false;   // tıklama kartın kendisinde
-                card.ButtonLabel = NewText(card.Button.transform, "Yazi", $"Üret [{i + 1}]", Vector2.zero, new Vector2(40, 12), 5.5f, Color.white, TextAlignmentOptions.Center);
-                card.Status = NewText(bg.transform, "Durum", "", new Vector2(37, 0), new Vector2(42, 22), 5.5f, darkText, TextAlignmentOptions.Center);
+                card.ButtonLabel = NewText(card.Button.transform, "Yazi", $"Üret [{i + 1}]", Vector2.zero, new Vector2(40, 12), 6f, Color.white, TextAlignmentOptions.Center);
+                card.Status = NewText(bg.transform, "Durum", "", new Vector2(37, 0), new Vector2(42, 22), 6f, darkText, TextAlignmentOptions.Center);
                 card.Status.textWrappingMode = TextWrappingModes.Normal;
                 _cards[i] = card;
             }
